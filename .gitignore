@@ -1,0 +1,28 @@
+node_modules/
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+
+# Ambiente
+.env
+.env.local
+.env.*.local
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Expo / React Native
+.expo/
+android/
+ios/
+*.keystore
+!debug.keystore
+
+# Editor / SO
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/

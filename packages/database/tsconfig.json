@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "noEmit": true,
+
+    // O WatermelonDB usa decorators legados (estagio 1). Os dois flags andam
+    // juntos: com `useDefineForClassFields` ligado - que e o padrao do TypeScript
+    // quando target >= ES2022 - a declaracao do campo redefine a propriedade
+    // depois do decorator rodar e sobrescreve o getter com `undefined`. O sintoma
+    // e cruel: compila, roda e todo campo do model le vazio.
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false
+  },
+  "include": ["src/**/*.ts"]
+}

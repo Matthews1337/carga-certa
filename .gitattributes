@@ -1,0 +1,21 @@
+# LF no repositorio e no diretorio de trabalho, inclusive no Windows.
+#
+# O projeto compila em Windows, macOS e nos runners de build do EAS. Deixar o
+# git converter para CRLF ao clonar faz o mesmo arquivo ter hash diferente em
+# maquinas diferentes, e scripts de shell que entram no container quebram.
+* text=auto eol=lf
+
+# Binarios: nunca converter.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.pdf binary
+*.keystore binary
+*.jks binary
+*.ttf binary
+*.otf binary
+
+# Arquivos gerados: colapsa no diff do GitHub e ignora em `git diff` local.
+pnpm-lock.yaml -diff linguist-generated
+packages/shared/src/database.types.ts -diff linguist-generated

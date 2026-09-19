@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(corepack pnpm -r typecheck)",
+      "PowerShell(corepack pnpm add -D -w vitest)",
+      "PowerShell(corepack pnpm --filter @carga-certa/shared test)",
+      "PowerShell(corepack pnpm -r test)"
+    ]
+  }
+}
