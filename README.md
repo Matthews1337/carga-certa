@@ -36,13 +36,20 @@ O `corepack` vem com o Node e dispensa instalar o pnpm globalmente. Depois de
 `corepack enable` (uma vez, como administrador no Windows), `pnpm` funciona
 direto, sem o prefixo.
 
-Para o banco, e preciso a CLI do Supabase e o Docker:
+Para o banco, e preciso o Docker rodando. A CLI do Supabase ja esta no
+workspace, entao nao precisa instalar nada global:
 
 ```powershell
-supabase start
-supabase db reset          # aplica migrations + seed
+corepack pnpm exec supabase start
+corepack pnpm db:reset     # aplica migrations + seed
+corepack pnpm db:test      # 17 casos de RLS e sync; todos devem dar OK
 corepack pnpm db:types     # gera packages/shared/src/database.types.ts
 ```
+
+`db:test` roda [supabase/tests/rls_sync.sql](supabase/tests/rls_sync.sql) como a
+role `authenticated`, com o mesmo claim de JWT que o PostgREST injeta. Rode
+depois de mexer em qualquer policy, trigger ou nas RPCs de sync - tres bugs que
+so aparecem sob RLS foram encontrados assim.
 
 ## O que o codigo do app precisa saber
 
@@ -85,6 +92,20 @@ lados: transformar em instante faz o vencimento mudar de dia na divisa de fuso.
 **Mudar `schema.ts` exige subir a `version` e escrever a migration.** Sem a
 migration o WatermelonDB apaga o banco do aparelho e recria - levando junto o que
 ainda nao tinha subido.
+
+**Filtrar `deleted_at is null` e trabalho da consulta, nao da policy.** Nenhuma
+policy de SELECT filtra registro excluido, e isso e deliberado: no Postgres, um
+UPDATE exige que a linha resultante continue visivel sob as policies de SELECT,
+entao o filtro na policy tornaria a propria exclusao logica impossivel - e ainda
+impediria o pull de montar a lista `deleted`. Toda consulta direta ao PostgREST
+precisa do `.is('deleted_at', null)`. No WatermelonDB isso nao se aplica: o
+registro excluido some do banco local.
+
+**`estabelecimento` e o unico catalogo que o usuario alimenta**, e o unico com um
+id de usuario visivel no cliente (`criado_por`). Todo mundo enxerga todo posto,
+mas so o autor corrige o proprio - consulte `podeEditar()` antes de mostrar o
+botao de editar, porque um push recusado fica preso na fila tentando subir de
+novo a cada sync.
 
 ## Sincronizacao
 

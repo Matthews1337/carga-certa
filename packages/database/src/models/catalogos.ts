@@ -100,9 +100,22 @@ export class Estabelecimento extends Model {
   @field('tipo') tipo!: TipoEstabelecimento;
   @field('latitude') latitude!: number | null;
   @field('longitude') longitude!: number | null;
+  /** Quem cadastrou. Preenchido pelo servidor; nao escreva. */
+  @field('criado_por') criadoPor!: string | null;
 
   @relation('cidade', 'cidade_id') cidade!: Relation<Cidade>;
 
   @readonly @date('created_at') createdAt!: Date;
   @readonly @date('updated_at') updatedAt!: Date;
+
+  /**
+   * Se este usuario pode corrigir o registro.
+   *
+   * Consulte antes de mostrar o botao de editar: a policy so aceita alteracao
+   * de quem criou, e um push recusado fica preso na fila do WatermelonDB,
+   * tentando subir de novo a cada sync.
+   */
+  podeEditar(pilotoId: string): boolean {
+    return this.criadoPor === pilotoId;
+  }
 }

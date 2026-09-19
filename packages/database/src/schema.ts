@@ -186,6 +186,11 @@ export const schema = appSchema({
       name: 'estabelecimento',
       columns: [
         { name: 'cidade_id', type: 'string', isOptional: true, isIndexed: true },
+        // Diferente das outras tabelas, este id de usuario desce para o
+        // cliente: o catalogo e compartilhado e o app precisa saber se o posto
+        // e editavel. O servidor preenche por DEFAULT auth.uid() e a policy
+        // rejeita qualquer outro valor.
+        { name: 'criado_por', type: 'string', isOptional: true, isIndexed: true },
         { name: 'nome', type: 'string', isIndexed: true },
         { name: 'cnpj', type: 'string', isOptional: true },
         { name: 'tipo', type: 'string', isIndexed: true },

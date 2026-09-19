@@ -160,9 +160,26 @@ negócio e fica no pacote compartilhado entre web e mobile.
 
 ## Verificação
 
-As quatro migrations foram aplicadas num PostgreSQL 16 com `auth` e `storage`
-emulados, e os seguintes cenários testados: criação de perfil pela trigger,
-`piloto_id` preenchido sozinho, isolamento entre dois usuários, bloqueio de
-referência cruzada entre donos, pull inicial, push com `piloto_id` forjado
-(ignorado), reenvio do mesmo lote (idempotente), exclusão lógica e tentativa de
-escrita em tabela fora da whitelist (rejeitada).
+`pnpm db:test` roda [tests/rls_sync.sql](tests/rls_sync.sql) contra o stack local
+do Supabase, como a role `authenticated` e com o mesmo claim de JWT que o
+PostgREST injeta. São 17 casos: criação de perfil pela trigger, `piloto_id`
+preenchido sozinho, push com `piloto_id` forjado (ignorado), isolamento entre
+dois usuários, criação e edição de categoria e estabelecimento, tentativa de
+editar registro alheio, exclusão lógica e sua propagação pelo pull.
+
+Três bugs saíram daí, todos invisíveis sem RLS ativa:
+
+**`categoria_despesa.piloto_id` não tinha `DEFAULT auth.uid()`.** Como o push
+remove o campo, a linha entrava com nulo e a policy barrava. Criar categoria
+personalizada era impossível.
+
+**`piloto` não tinha policy de INSERT.** O Postgres exige uma para
+`insert ... on conflict do update` mesmo quando a execução cai no caminho do
+UPDATE. O motorista não conseguia sincronizar nome, telefone nem foto.
+
+**As policies de SELECT filtravam `deleted_at is null`.** Num UPDATE o Postgres
+exige que a linha resultante continue visível sob as policies de SELECT; ao
+ganhar `deleted_at` ela sumia para si mesma e o comando falhava. O mesmo filtro
+impedia o `pull_changes` de montar a lista `deleted`, então uma exclusão jamais
+alcançaria os outros aparelhos. Agora quem filtra registro excluído é a consulta
+do app, não a policy.

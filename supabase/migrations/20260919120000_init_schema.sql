@@ -198,6 +198,13 @@ create table public.condicao_trajeto (
 create table public.estabelecimento (
     id         uuid primary key default public.uuid_generate_v7(),
     cidade_id  uuid references public.cidade (id) on delete set null,
+    -- Quem cadastrou. Diferente de piloto_id de proposito: este catalogo e
+    -- compartilhado - todo usuario enxerga todo posto - mas so o autor corrige
+    -- o que ele mesmo cadastrou. Com o nome piloto_id, a RPC de sync removeria
+    -- a coluna do payload e o app nao teria como saber se pode editar.
+    -- A FK aponta para auth.users porque piloto so e criada mais abaixo; como
+    -- piloto.id E o id do auth.users, da no mesmo.
+    criado_por uuid default auth.uid() references auth.users (id) on delete set null,
     nome       text not null,
     cnpj       text,
     tipo       public.tipo_estabelecimento not null default 'POSTO',
@@ -209,6 +216,7 @@ create table public.estabelecimento (
 );
 
 create index ix_estabelecimento_cidade on public.estabelecimento (cidade_id);
+create index ix_estabelecimento_autor  on public.estabelecimento (criado_por);
 create unique index ux_estabelecimento_cnpj on public.estabelecimento (cnpj) where cnpj is not null;
 
 -- -----------------------------------------------------------------------------
@@ -473,8 +481,12 @@ for each row execute function public.valida_parente('viagem', 'viagem_id');
 create table public.categoria_despesa (
     id               uuid primary key default public.uuid_generate_v7(),
     categoria_pai_id uuid references public.categoria_despesa (id) on delete restrict,
-    -- NULO = categoria padrao do sistema, visivel para todos
-    piloto_id        uuid references public.piloto (id) on delete cascade,
+    -- NULO = categoria padrao do sistema, visivel para todos.
+    -- O DEFAULT e obrigatorio: a RPC de push remove piloto_id do payload, entao
+    -- sem ele toda categoria criada pelo app entraria com NULO e seria barrada
+    -- pela policy. No seed nao muda nada - rodando como service_role, auth.uid()
+    -- e nulo, que e exatamente o que as categorias do sistema precisam.
+    piloto_id        uuid default auth.uid() references public.piloto (id) on delete cascade,
     nome             text not null,
     escopo           public.escopo_categoria not null,
     dedutivel        boolean not null default true,
