@@ -3,25 +3,20 @@ import { Truck } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { Navigate, useLocation } from 'react-router-dom';
-import { z } from 'zod';
 
 import { useAuth } from '@/auth/AuthProvider';
+import {
+  esquemaEntrada,
+  validarNome,
+  type CamposEntrada,
+  type Modo,
+} from '@/auth/esquema';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/feedback';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/lib/supabase';
-
-const esquema = z.object({
-  nome: z.string().trim().min(2, 'Informe seu nome').optional(),
-  email: z.string().trim().email('E-mail invalido'),
-  senha: z.string().min(8, 'A senha precisa de pelo menos 8 caracteres'),
-});
-
-type Campos = z.infer<typeof esquema>;
-
-type Modo = 'entrar' | 'criar';
 
 export function LoginPage() {
   const { session } = useAuth();
@@ -30,8 +25,8 @@ export function LoginPage() {
   const [erro, setErro] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
 
-  const form = useForm<Campos>({
-    resolver: zodResolver(esquema),
+  const form = useForm<CamposEntrada>({
+    resolver: zodResolver(esquemaEntrada),
     defaultValues: { nome: '', email: '', senha: '' },
   });
 
@@ -40,35 +35,50 @@ export function LoginPage() {
     return <Navigate to={destino} replace />;
   }
 
-  const enviar = form.handleSubmit(async ({ nome, email, senha }) => {
-    setErro(null);
-    setAviso(null);
+  const enviar = form.handleSubmit(
+    async ({ nome, email, senha }) => {
+      setErro(null);
+      setAviso(null);
 
-    if (modo === 'entrar') {
-      const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-      if (error) setErro(traduzir(error.message));
-      return;
-    }
+      const erroNome = validarNome(modo, nome);
+      if (erroNome) {
+        form.setError('nome', { message: erroNome });
+        return;
+      }
 
-    // `nome` vai em raw_user_meta_data: a trigger on_auth_user_created le esse
-    // campo para preencher public.piloto no mesmo instante do cadastro.
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password: senha,
-      options: { data: { nome } },
-    });
+      if (modo === 'entrar') {
+        const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+        if (error) setErro(traduzir(error.message));
+        return;
+      }
 
-    if (error) {
-      setErro(traduzir(error.message));
-      return;
-    }
+      // `nome` vai em raw_user_meta_data: a trigger on_auth_user_created le
+      // esse campo para preencher public.piloto no instante do cadastro.
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password: senha,
+        options: { data: { nome } },
+      });
 
-    // Com confirmacao de e-mail ligada, o signUp devolve usuario sem sessao.
-    if (!data.session) {
-      setAviso('Confira seu e-mail para confirmar o cadastro e depois entre.');
-      setModo('entrar');
-    }
-  });
+      if (error) {
+        setErro(traduzir(error.message));
+        return;
+      }
+
+      // Com confirmacao de e-mail ligada, o signUp devolve usuario sem sessao.
+      if (!data.session) {
+        setAviso('Confira seu e-mail para confirmar o cadastro e depois entre.');
+        setModo('entrar');
+      }
+    },
+    // Rede de seguranca: sem este ramo, uma reprovacao de validacao num campo
+    // que nao esta na tela deixa o botao sem reacao nenhuma - exatamente o que
+    // acontecia quando o schema exigia tamanho minimo do nome durante o login.
+    (erros) => {
+      const primeira = Object.values(erros).find((e) => e?.message)?.message;
+      setErro(primeira ? String(primeira) : 'Confira os campos do formulario.');
+    },
+  );
 
   const criando = modo === 'criar';
 
