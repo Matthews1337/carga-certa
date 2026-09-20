@@ -1,3 +1,8 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+# O pnpm 12 nao roda script de instalacao sem aprovacao explicita. O esbuild
+# precisa do postinstall dele para baixar o binario nativo da plataforma; sem
+# isso o Vite nao sobe.
+allowBuilds:
+  esbuild: true

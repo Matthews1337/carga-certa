@@ -4,6 +4,7 @@
   "private": true,
   "description": "Gestao de gastos de frete para caminhoneiros - web e mobile",
   "scripts": {
+    "dev": "pnpm --filter @carga-certa/web dev",
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "pnpm -r test",
     "build": "pnpm -r build",

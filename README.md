@@ -11,7 +11,7 @@ arquitetura: o dado nasce no aparelho, em SQLite, e sobe quando a rede volta.
 
 ```
 apps/
-  web/                 (a criar) React + Vite, online, fala direto com o Supabase
+  web/                 React + Vite, online, fala direto com o Supabase
   mobile/              (a criar) Expo + dev build, offline-first via WatermelonDB
 packages/
   shared/              regra de negocio pura: enums, validacao, calculos, formatacao
@@ -30,7 +30,11 @@ permite `calcularResultadoViagem()` rodar igual nos dois apps e num teste em Nod
 corepack pnpm install
 corepack pnpm test         # 56 testes, sem rede e sem banco
 corepack pnpm typecheck
+corepack pnpm dev          # app web em http://localhost:5173
 ```
+
+O web precisa de `apps/web/.env.local` - copie de `apps/web/.env.example`, que ja
+vem apontando para o Supabase local.
 
 O `corepack` vem com o Node e dispensa instalar o pnpm globalmente. Depois de
 `corepack enable` (uma vez, como administrador no Windows), `pnpm` funciona
