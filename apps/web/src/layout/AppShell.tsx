@@ -17,6 +17,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { BotaoTema } from '@/tema/BotaoTema';
 
 /**
  * Navegacao do app.
@@ -47,15 +48,18 @@ export function AppShell() {
           <Truck className="size-5 text-accent" aria-hidden />
           Carga Certa
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setMenuAberto((v) => !v)}
-          aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
-          aria-expanded={menuAberto}
-        >
-          {menuAberto ? <X className="size-5" /> : <Menu className="size-5" />}
-        </Button>
+        <div className="flex items-center gap-1">
+          <BotaoTema />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMenuAberto((v) => !v)}
+            aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
+            aria-expanded={menuAberto}
+          >
+            {menuAberto ? <X className="size-5" /> : <Menu className="size-5" />}
+          </Button>
+        </div>
       </header>
 
       <aside
@@ -95,6 +99,7 @@ export function AppShell() {
           <p className="truncate px-3 pb-2 text-xs text-muted-foreground" title={user?.email ?? ''}>
             {user?.email}
           </p>
+          <BotaoTema comRotulo />
           <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => void sair()}>
             <LogOut className="size-4" aria-hidden />
             Sair

@@ -17,6 +17,7 @@ import { Spinner } from '@/components/ui/feedback';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/lib/supabase';
+import { BotaoTema } from '@/tema/BotaoTema';
 
 export function LoginPage() {
   const { session } = useAuth();
@@ -83,7 +84,11 @@ export function LoginPage() {
   const criando = modo === 'criar';
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-secondary/40 p-4">
+    <div className="relative flex min-h-svh items-center justify-center bg-secondary/40 p-4">
+      <div className="absolute right-3 top-3">
+        <BotaoTema />
+      </div>
+
       <Card className="w-full max-w-md">
         <CardHeader className="items-center text-center">
           <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-xl bg-accent text-accent-foreground">

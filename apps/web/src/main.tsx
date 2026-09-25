@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 
 import { App } from '@/App';
 import { AuthProvider } from '@/auth/AuthProvider';
+import { TemaProvider } from '@/tema/TemaProvider';
 
 import './index.css';
 
@@ -27,12 +28,14 @@ if (!raiz) throw new Error('Elemento #root nao encontrado no index.html');
 
 createRoot(raiz).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <TemaProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </TemaProvider>
   </StrictMode>,
 );

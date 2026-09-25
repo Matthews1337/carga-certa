@@ -17,6 +17,7 @@ src/
   despesas/     a fatia vertical completa: consulta, formulario, exclusao, comprovante
   layout/       shell com a navegacao de todas as secoes
   lib/          cliente do Supabase e utilitarios
+  tema/         claro / escuro / automatico
 ```
 
 `despesas/` e o modelo para as demais secoes. A separacao que vale copiar e
@@ -43,6 +44,27 @@ mesmo esquema de id que o mobile usa offline.
 usuario porque a policy do Storage compara o primeiro segmento da pasta com
 `auth.uid()`. Monte sempre com `caminhoComprovante()`. A URL assinada e gerada
 no clique e expira em uma hora.
+
+## Tema
+
+Tres estados - claro, escuro e automatico (segue o sistema), nesta ordem no
+botao que cicla. O padrao e automatico, e a escolha fica em `carga-certa:tema`
+no localStorage.
+
+A classe `.dark` vai no `<html>`: a variante do Tailwind e `&:is(.dark *)`,
+entao precisa de um ancestral, e o `color-scheme` no `:root` e o que faz barra
+de rolagem e campo nativo acompanharem.
+
+Quem aplica a classe no carregamento e um script inline no
+[index.html](index.html), antes do primeiro paint - o React so recupera a
+decisao depois. Sem ele, quem usa o tema escuro leva um estouro de tela branca a
+cada carregamento, o que de madrugada na estrada cega por alguns segundos. Esse
+script repete a regra de [src/tema/tema.ts](src/tema/tema.ts) de proposito,
+porque roda antes de existir modulo: mexeu em um, mexa no outro.
+
+Toda a UI ja sai do token (`bg-card`, `text-muted-foreground`, ...), nunca de
+cor literal - e o que permitiu o tema escuro nascer sem tocar em componente
+nenhum. Manter assim.
 
 ## Componentes de UI
 
