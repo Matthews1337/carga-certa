@@ -29,3 +29,6 @@ Thumbs.db
 
 # Permissoes locais do Claude Code (pessoais, nao do projeto)
 .claude/settings.local.json
+
+# Snapshots que o MCP do Playwright despeja ao navegar
+.playwright-mcp/
