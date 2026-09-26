@@ -75,7 +75,7 @@ declare
     v_cat uuid;
 begin
     select id into v_cat from public.categoria_despesa
-    where nome = 'Combustivel' and piloto_id is null and categoria_pai_id is null;
+    where nome = 'Combustível' and piloto_id is null and categoria_pai_id is null;
 
     perform public.push_changes(jsonb_build_object(
         'despesa', jsonb_build_object(
@@ -265,7 +265,7 @@ declare
     v_cat uuid;
 begin
     select id into v_cat from public.categoria_despesa
-    where nome = 'Pedagio' and piloto_id is null and categoria_pai_id is null;
+    where nome = 'Pedágio' and piloto_id is null and categoria_pai_id is null;
 
     perform public.push_changes(jsonb_build_object(
         'despesa', jsonb_build_object(
