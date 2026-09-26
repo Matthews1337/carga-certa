@@ -10,17 +10,18 @@ import { AppShell, EmBreve } from '@/layout/AppShell';
   Cada secao de dominio vira um arquivo separado, baixado so quando a rota e
   visitada.
 
-  Hoje o ganho e modesto - so Despesas existe de fato. O motivo de fazer agora
-  e outro: faltam seis secoes (painel, viagens, fretes, veiculos, contratantes,
-  documentos). Num arquivo unico, cada uma delas engorda o download de TODO
-  mundo, inclusive de quem nunca abre aquela tela. Montar a divisao depois
-  custa o mesmo e significa ter servido lento no meio tempo.
+  Existem Despesas e Painel; faltam cinco secoes (viagens, fretes, veiculos,
+  contratantes, documentos). Num arquivo unico, cada uma delas engordaria o
+  download de TODO mundo, inclusive de quem nunca abre aquela tela.
 
   LoginPage fica fora de proposito: e a primeira tela de quem nao tem sessao,
   e adiar o carregamento dela so acrescentaria uma espera antes do login.
 */
 const DespesasPage = lazy(() =>
   import('@/despesas/DespesasPage').then((m) => ({ default: m.DespesasPage })),
+);
+const PainelPage = lazy(() =>
+  import('@/painel/PainelPage').then((m) => ({ default: m.PainelPage })),
 );
 
 export function App() {
@@ -42,7 +43,14 @@ export function App() {
               </Suspense>
             }
           />
-          <Route path="/painel" element={<EmBreve titulo="Painel" />} />
+          <Route
+            path="/painel"
+            element={
+              <Suspense fallback={<Carregando />}>
+                <PainelPage />
+              </Suspense>
+            }
+          />
           <Route path="/viagens" element={<EmBreve titulo="Viagens" />} />
           <Route path="/fretes" element={<EmBreve titulo="Fretes" />} />
           <Route path="/veiculos" element={<EmBreve titulo="Veículos" />} />
