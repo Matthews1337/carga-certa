@@ -222,7 +222,16 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = true
+#
+# Desligado de proposito, e o remoto precisa ficar igual (Authentication ->
+# Providers -> Email -> Confirm email). Confirmar exige SMTP proprio, e o
+# servico embutido do Supabase recusa entregar para qualquer endereco fora da
+# equipe do projeto - ou seja, funcionaria so para nos e falharia calado para
+# todo caminhoneiro de verdade.
+#
+# O preco aceito: ninguem valida o endereco digitado, e nao ha recuperacao de
+# senha, que depende do mesmo e-mail. Ao plugar SMTP, religue aqui E no painel.
+enable_confirmations = false
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.

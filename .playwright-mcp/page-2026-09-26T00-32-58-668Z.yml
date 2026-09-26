@@ -1,0 +1,238 @@
+- generic [ref=f5e1]:
+  - link [aria-hidden] [ref=f5e2] [cursor=pointer]:
+    - /url: "#"
+    - text: ___
+  - complementary "Open Cookie Preferences Modal" [ref=f5e4]:
+    - button "Cookie Preferences, opens a dedicated popup modal window" [ref=f5e5] [cursor=pointer]:
+      - img "Preferências de Cookies" [ref=f5e6]
+  - banner [ref=f5e7]:
+    - generic [ref=f5e9]:
+      - link "Login" [ref=f5e14] [cursor=pointer]:
+        - /url: https://login.sendgrid.com/login/identifier
+      - generic [ref=f5e16]:
+        - link "Twilio" [ref=f5e18] [cursor=pointer]:
+          - /url: /en-us
+        - link "Start for free" [ref=f5e52] [cursor=pointer]:
+          - /url: https://signup.sendgrid.com/
+  - main [ref=f5e54]:
+    - generic [ref=f5e57]:
+      - generic [ref=f5e58]:
+        - heading "SendGrid ❤️ Twilio. We're finally moving in together on Twilio.com!" [level=1] [ref=f5e60]
+        - paragraph [ref=f5e62]:
+          - generic [ref=f5e63]:
+            - text: We're merging our websites to make things simpler. You can now find all our trusted email solutions, plus everything else Twilio offers, over on
+            - link "Twilio.com" [ref=f5e64] [cursor=pointer]:
+              - /url: /en-us
+            - text: .
+        - link "Visit Twilio.com" [ref=f5e66] [cursor=pointer]:
+          - /url: /en-us
+      - figure [ref=f5e69]:
+        - img "Person in red using a computer displaying Twilio, with icons of message, person, and speech bubble." [ref=f5e71]
+    - generic [ref=f5e76]:
+      - heading "Same email solutions, new home base." [level=2] [ref=f5e79]
+      - generic [ref=f5e80]:
+        - paragraph [ref=f5e82]:
+          - text: Don’t worry—the same SendGrid email products and services, documentation and resources you know and love are available and fully supported on
+          - link "Twilio.com" [ref=f5e83] [cursor=pointer]:
+            - /url: /en-us
+          - text: .
+        - link "Log in now" [ref=f5e85] [cursor=pointer]:
+          - /url: https://login.sendgrid.com/login/identifier
+    - heading "Email at scale, proven deliverability, and so much more" [level=2] [ref=f5e92]
+    - paragraph [ref=f5e98]: Send email on a world-class platform that delivers more than 200 billion emails every month—and explore the rest of the Twilio Platform to build a complete solution for verification and identity, alerts, support and sales, and more.
+    - generic [ref=f5e100]:
+      - generic [ref=f5e101]:
+        - generic [ref=f5e104]:
+          - figure [ref=f5e105]:
+            - img "Man wearing glasses using a computer to send emails in an office." [ref=f5e107]
+          - generic [ref=f5e108]:
+            - heading "Twilio SendGrid Email API and SMTP service" [level=5] [ref=f5e109]
+            - paragraph [ref=f5e110]: The trusted SendGrid Email API for delivery at scale.
+          - generic [ref=f5e113]:
+            - link "Explore SendGrid Email API" [ref=f5e114] [cursor=pointer]:
+              - /url: /en-us/products/email-api
+            - link "View pricing" [ref=f5e116] [cursor=pointer]:
+              - /url: /en-us/products/email-api/pricing
+        - generic [ref=f5e120]:
+          - figure [ref=f5e121]:
+            - img "Man with glasses smiling and pointing at something near a window" [ref=f5e123]
+          - generic [ref=f5e124]:
+            - heading "Email campaigns for marketers" [level=5] [ref=f5e125]
+            - paragraph [ref=f5e126]: Flexible tools for creating engaging email campaigns.
+          - generic [ref=f5e129]:
+            - link "Explore Marketing Campaigns" [ref=f5e130] [cursor=pointer]:
+              - /url: /en-us/products/marketing-campaigns
+            - link "View pricing" [ref=f5e132] [cursor=pointer]:
+              - /url: /en-us/products/marketing-campaigns/pricing
+      - generic [ref=f5e134]:
+        - link "View all Twilio products" [ref=f5e135] [cursor=pointer]:
+          - /url: /en-us/products
+        - link "Explore Twilio Platform" [ref=f5e137] [cursor=pointer]:
+          - /url: /en-us/customer-engagement-platform
+    - heading "Resources to learn, build, or troubleshoot" [level=2] [ref=f5e144]
+    - generic [ref=f5e147]:
+      - list [ref=f5e149]:
+        - listitem [ref=f5e150]:
+          - generic [ref=f5e155]:
+            - paragraph [ref=f5e157]:
+              - link "Documentation" [ref=f5e158] [cursor=pointer]:
+                - /url: https://www.twilio.com/docs/sendgrid
+            - paragraph [ref=f5e160]: Use up-to-date documentation to quickly integrate and send with our APIs.
+        - listitem [ref=f5e161]:
+          - generic [ref=f5e166]:
+            - paragraph [ref=f5e168]:
+              - link "Help Center" [ref=f5e169] [cursor=pointer]:
+                - /url: https://support.sendgrid.com/
+            - paragraph [ref=f5e171]: Chat with our AI assistant to get answers to your questions, troubleshoot, or find helpful information.
+        - listitem [ref=f5e172]:
+          - generic [ref=f5e177]:
+            - paragraph [ref=f5e179]:
+              - link "Partners" [ref=f5e180] [cursor=pointer]:
+                - /url: https://www.twilio.com/en-us/partners
+            - paragraph [ref=f5e182]: Work with one of our trusted partners to integrate our Email API, optimize deliverability, or get help with a pre-built or custom solution.
+      - list [ref=f5e184]:
+        - listitem [ref=f5e185]:
+          - img "Browser Blog" [ref=f5e187]
+          - generic [ref=f5e191]:
+            - paragraph [ref=f5e193]:
+              - link "Blog" [ref=f5e194] [cursor=pointer]:
+                - /url: https://www.twilio.com/en-us/blog/insights?page=1&products=email%2Cmarketing-campaigns
+            - paragraph [ref=f5e196]: Find guidance and best practices for building with our Email API, improving deliverability, and sending great emails.
+        - listitem [ref=f5e197]:
+          - img "Browser palying video" [ref=f5e199]
+          - generic [ref=f5e204]:
+            - paragraph [ref=f5e206]:
+              - link "Resource Center" [ref=f5e207] [cursor=pointer]:
+                - /url: https://www.twilio.com/en-us/resource-center/guides?asset-type=guide&page=1&products=email%2Cmarketing-campaigns
+            - paragraph [ref=f5e209]: Find strategic guides, insights, and research to sharpen your customer engagement strategy.
+        - listitem [ref=f5e210]:
+          - generic [ref=f5e215]:
+            - paragraph [ref=f5e217]:
+              - link "Status" [ref=f5e218] [cursor=pointer]:
+                - /url: https://status.sendgrid.com/
+            - paragraph [ref=f5e220]: See the status of our products.
+  - contentinfo [ref=f5e221]:
+    - generic [ref=f5e225]:
+      - generic [ref=f5e228]:
+        - figure [ref=f5e231]:
+          - link [ref=f5e232] [cursor=pointer]:
+            - /url: /en-us
+            - generic "Twilio" [ref=f5e233]:
+              - img "Twilio" [ref=f5e234]
+        - generic [ref=f5e247]:
+          - generic [ref=f5e249]:
+            - paragraph [ref=f5e250]: "Get an AI summary:"
+            - list [ref=f5e251]:
+              - listitem [ref=f5e252]:
+                - link "Get a summary from ChatGPT" [ref=f5e253] [cursor=pointer]:
+                  - /url: https://chatgpt.com/?q=Give%20me%20an%20easy-to-understand%20breakdown%20of%20this%20page%20https://www.twilio.com/en-us/sendgrid.%20Explain%20its%20main%20purpose,%20key%20offerings,%20and%20most%20important%20takeaways.%20Use%20https://www.twilio.com/en-us/sendgrid%20as%20the%20primary%20source.
+              - listitem [ref=f5e258]:
+                - link "Get a summary from Gemini" [ref=f5e259] [cursor=pointer]:
+                  - /url: https://www.google.com/search?udm=50&aep=11&q=Give%20me%20an%20easy-to-understand%20breakdown%20of%20this%20page%20https://www.twilio.com/en-us/sendgrid.%20Explain%20its%20main%20purpose,%20key%20offerings,%20and%20most%20important%20takeaways.%20Use%20https://www.twilio.com/en-us/sendgrid%20as%20the%20primary%20source.
+              - listitem [ref=f5e264]:
+                - link "Get a summary from Claude" [ref=f5e265] [cursor=pointer]:
+                  - /url: https://claude.ai/new?q=Give%20me%20an%20easy-to-understand%20breakdown%20of%20this%20page%20https://www.twilio.com/en-us/sendgrid.%20Explain%20its%20main%20purpose,%20key%20offerings,%20and%20most%20important%20takeaways.%20Use%20https://www.twilio.com/en-us/sendgrid%20as%20the%20primary%20source.
+          - generic:
+            - separator
+          - generic:
+            - separator
+        - list [ref=f5e271]:
+          - listitem [ref=f5e272]:
+            - link "Twilio careers" [ref=f5e275] [cursor=pointer]:
+              - /url: http://jobs.twilio.com/
+          - listitem [ref=f5e277]:
+            - link "Twilio.org" [ref=f5e280] [cursor=pointer]:
+              - /url: https://www.twilio.org/en-us
+          - listitem [ref=f5e282]:
+            - link "Press and media" [ref=f5e285] [cursor=pointer]:
+              - /url: /en-us/press
+          - listitem [ref=f5e287]:
+            - link "Investor relations" [ref=f5e290] [cursor=pointer]:
+              - /url: https://investors.twilio.com/
+          - listitem [ref=f5e292]:
+            - link "Legal" [ref=f5e295] [cursor=pointer]:
+              - /url: /en-us/legal/tos
+          - listitem [ref=f5e297]:
+            - link "Privacy" [ref=f5e300] [cursor=pointer]:
+              - /url: /en-us/legal/privacy
+          - listitem [ref=f5e302]:
+            - link "Security" [ref=f5e305] [cursor=pointer]:
+              - /url: /en-us/security
+          - listitem [ref=f5e307]:
+            - link "Sitemap" [ref=f5e310] [cursor=pointer]:
+              - /url: https://www.twilio.com/sitemap.xml
+          - listitem [ref=f5e312]:
+            - link "LLMS" [ref=f5e315] [cursor=pointer]:
+              - /url: https://www.twilio.com/llms.txt
+        - list [ref=f5e320]:
+          - listitem [ref=f5e321]:
+            - link "Twilio on Facebook" [ref=f5e322] [cursor=pointer]:
+              - /url: https://www.facebook.com/TeamTwilio
+          - listitem [ref=f5e326]:
+            - link "Twilio on X" [ref=f5e327] [cursor=pointer]:
+              - /url: https://x.com/twilio
+              - img "Twitter Logo" [ref=f5e329]
+          - listitem [ref=f5e331]:
+            - link "Twilio on LinkedIn" [ref=f5e332] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/twilio-inc-
+          - listitem [ref=f5e336]:
+            - link "Twilio on Youtube" [ref=f5e337] [cursor=pointer]:
+              - /url: https://www.youtube.com/@twilio
+        - paragraph [ref=f5e340]: Copyright © 2026 Twilio Inc. All rights reserved.
+      - generic [ref=f5e342]:
+        - generic [ref=f5e344]:
+          - button [ref=f5e345] [cursor=pointer]:
+            - figure [ref=f5e347]
+          - list
+        - generic [ref=f5e350]:
+          - button [ref=f5e351] [cursor=pointer]:
+            - figure [ref=f5e353]
+          - list
+        - generic [ref=f5e356]:
+          - button [ref=f5e357] [cursor=pointer]:
+            - figure [ref=f5e359]
+          - list
+        - generic [ref=f5e362]:
+          - button [ref=f5e363] [cursor=pointer]:
+            - figure [ref=f5e365]
+          - list
+  - dialog "Your choices regarding the use of cookies on this site" [ref=f5e370]:
+    - generic [ref=f5e374]:
+      - generic [ref=f5e376]:
+        - generic [ref=f5e378]:
+          - img "Twilio Logo" [ref=f5e380]
+          - heading "As suas opções relativamente a cookies neste site" [level=1] [ref=f5e381]
+          - paragraph [ref=f5e382]: Indique se este site pode utilizar cookies ou tecnologias similares, tais como web beacons, pixel tags e objectos Flash ("Cookies"), conforme descrito abaixo. Para mais informações sobre a forma como este site utiliza cookies e tecnologias similares, leia a nossa Política de Privacidade que se encontra mais abaixo.
+        - generic [ref=f5e383]:
+          - generic [ref=f5e385]:
+            - generic [ref=f5e386]:
+              - heading "Cookies Obrigatórios" [level=3] [ref=f5e388]
+              - generic [ref=f5e389]: Estes cookies são necessários para o funcionamento do site, permitindo a execução de funções básicas, tais como aceder a áreas seguras de websites ou lembrar as suas preferências através de uma encomenda.
+            - button "View" [ref=f5e390] [cursor=pointer]: Apresentar cookies obrigatórios
+          - generic [ref=f5e392]:
+            - generic [ref=f5e393]:
+              - heading "Cookies Funcionais" [level=3] [ref=f5e395]
+              - generic [ref=f5e396]: "Estes cookies permitem-nos analisar a forma como utiliza o site para avaliar e melhorar o nosso desempenho. Também podem ser utilizados para melhorar a experiência de navegação do cliente neste site. Por exemplo: recordar os seus dados de acesso, guardar artigos no cesto de compras ou fornecer informações sobre a forma como o nosso site é utilizado."
+            - button "View" [ref=f5e397] [cursor=pointer]: Definições detalhadas
+            - listbox "Cookies Funcionais choice" [ref=f5e398]:
+              - button "Refuse Cookies Funcionais" [ref=f5e399] [cursor=pointer]: Não
+              - button "Accept Cookies Funcionais" [ref=f5e400] [cursor=pointer]: Sim
+          - generic [ref=f5e402]:
+            - generic [ref=f5e403]:
+              - heading "Cookies de Publicidade" [level=3] [ref=f5e405]
+              - generic [ref=f5e406]: Estes cookies são utilizados para apresentar anúncios baseados nas suas preferências. Podemos partilhar estas informações com os anunciantes ou utilizá-las para avaliar melhor os seus interesses. Por exemplo, os cookies de publicidade podem ser utilizados para partilhar dados com os anunciantes, por forma a direccionar as campanhas publicitárias tendo em conta os seus interesses, para permitir que partilhe determinadas páginas nas redes sociais ou que publique comentários no nosso site.
+            - button "View" [ref=f5e407] [cursor=pointer]: Definições detalhadas
+            - listbox "Cookies de Publicidade choice" [ref=f5e408]:
+              - button "Refuse Cookies de Publicidade" [ref=f5e409] [cursor=pointer]: Não
+              - button "Accept Cookies de Publicidade" [ref=f5e410] [cursor=pointer]: Sim
+        - generic [ref=f5e411]:
+          - button "Submeter preferências" [ref=f5e412]
+          - button "Accept All" [ref=f5e413] [cursor=pointer]
+          - button "Decline All" [ref=f5e414] [cursor=pointer]
+      - generic [ref=f5e415]:
+        - link "Politica de Privacidade" [ref=f5e417] [cursor=pointer]:
+          - /url: https://www.twilio.com/en-us/legal/privacy#cookies-and-tracking-technologies
+        - generic [ref=f5e418]:
+          - text: "Accionado por:"
+          - link [ref=f5e419] [cursor=pointer]:
+            - /url: http://trustarc.com/

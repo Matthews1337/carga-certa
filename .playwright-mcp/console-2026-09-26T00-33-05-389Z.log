@@ -1,0 +1,11 @@
+[     369ms] [LOG] https://jscloud.net/x/13724/httpswwwtwiliocomenusproductsemailapipricing.json @ https://jscloud.net/x/13724/inlinks.js:112
+[     467ms] [LOG] waiting for TrustArcConsentManager to load before trying to render new CM @ https://consent.trustarc.com/asset/notice.js/v/2872571:0
+[     502ms] TypeError: t is not a function
+    at sub-navigation (https://www.twilio.com/etc.clientlibs/twilio-com/clientlibs/clientlib-site.lc-d2ec9d42b153007c4a2037764ed99224-lc.min.js:1:123872)
+[     507ms] [LOG] On consent changed! @ :1
+[     509ms] [LOG] After On consent changed! @ :1
+[    1195ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://www.twilio.com/en-us/products/email-api/null:0
+[    2199ms] [LOG] 6sense Response received in: 300 ms @ https://assets.adobedtm.com/a62564f453ce/b1b9d7ec982b/launch-29605e749a31.min.js:1
+[    2199ms] [LOG] Trigger Analytics!!! @ https://assets.adobedtm.com/a62564f453ce/b1b9d7ec982b/launch-29605e749a31.min.js:1
+[   10423ms] [ERROR] Error: gtag did not load within 10000 ms
+    at https://www.twilio.com/en-us/products/email-api/pricing:35431:24 @ https://www.twilio.com/en-us/products/email-api/pricing:35616
