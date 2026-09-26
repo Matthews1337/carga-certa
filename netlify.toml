@@ -17,6 +17,20 @@
   # package.json da raiz (hoje pnpm@12.4.2), entao nao ha o que fixar aqui.
   NODE_VERSION = "22"
 
+  # A varredura de segredos da Netlify vem ligada e derruba o build quando
+  # encontra o valor de uma variavel de ambiente dentro dos arquivos
+  # publicados. Para VITE_* isso e garantido: o Vite grava o valor dentro do
+  # bundle, que e justamente o proposito delas.
+  #
+  # A anon key e um JWT e parece segredo, entao a deteccao a pega quase certo.
+  # Ela e publica por natureza - quem protege os dados e a RLS, nao a chave.
+  #
+  # Listar as duas chaves, em vez de desligar a varredura inteira, e
+  # deliberado: se um dia a service_role key entrar aqui por engano, a
+  # varredura continua ativa e quebra o build - que e exatamente o que
+  # queremos que aconteca.
+  SECRETS_SCAN_OMIT_KEYS = "VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY"
+
 # SPA: o React Router resolve as rotas no navegador, mas o servidor nao sabe
 # disso. Sem esta regra, abrir https://site/despesas direto - ou dar F5 numa
 # tela interna - devolve 404, porque nao existe o arquivo /despesas/index.html.
