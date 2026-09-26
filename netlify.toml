@@ -1,0 +1,43 @@
+# Netlify: build do app web dentro do monorepo pnpm.
+#
+# Sem este arquivo a deteccao automatica falha, e por um motivo simples: a
+# Netlify olha o package.json da raiz, que e um workspace sem nada para
+# publicar. Ela nao tem como adivinhar que o site mora em apps/web.
+
+[build]
+  # Os comandos rodam a partir da raiz do repo, que e onde estao o
+  # pnpm-workspace.yaml e o lockfile. A Netlify instala as dependencias
+  # sozinha ao encontrar pnpm-lock.yaml.
+  base = "/"
+  command = "pnpm --filter @carga-certa/web build"
+  publish = "apps/web/dist"
+
+[build.environment]
+  # A Netlify resolve a versao do pnpm pelo campo packageManager do
+  # package.json da raiz (hoje pnpm@12.4.2), entao nao ha o que fixar aqui.
+  NODE_VERSION = "22"
+
+# SPA: o React Router resolve as rotas no navegador, mas o servidor nao sabe
+# disso. Sem esta regra, abrir https://site/despesas direto - ou dar F5 numa
+# tela interna - devolve 404, porque nao existe o arquivo /despesas/index.html.
+# O status 200 entrega o index.html mantendo a URL, e o roteador assume dali.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Cabecalhos de seguranca basicos. O app e 100% autenticado e nao deve ser
+# embutido em iframe de terceiros.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Os assets do Vite levam hash no nome, entao podem ser cacheados para sempre.
+# O index.html nao pode: e ele que aponta para o bundle novo a cada deploy.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
