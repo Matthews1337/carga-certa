@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@carga-certa/shared';
 
+import { normalizarUrlSupabase, problemasDoAmbiente } from '@/lib/env';
+
 /**
  * Cliente do Supabase, tipado pelo schema real.
  *
@@ -9,23 +11,28 @@ import type { Database } from '@carga-certa/shared';
  * essa sim, NUNCA pode aparecer aqui - ela ignora RLS por definicao.
  */
 
-const url = import.meta.env.VITE_SUPABASE_URL;
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
-if (!url || !anonKey) {
-  throw new Error(
-    'VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY sao obrigatorias. ' +
-      'Copie apps/web/.env.example para apps/web/.env.local e preencha.',
-  );
-}
-
-export const supabase = createClient<Database>(url, anonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
+// A mesma checagem do build (vite.config.ts), aqui para o dev server. Troca o
+// 404 enigmatico por uma mensagem que diz exatamente o que corrigir e onde.
+const problema = problemasDoAmbiente({
+  VITE_SUPABASE_URL: url,
+  VITE_SUPABASE_ANON_KEY: anonKey,
 });
+if (problema) throw new Error(problema);
+
+export const supabase = createClient<Database>(
+  normalizarUrlSupabase(url as string),
+  anonKey as string,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  },
+);
 
 /**
  * LEMBRETE PARA TODA CONSULTA: `.is('deleted_at', null)`.
