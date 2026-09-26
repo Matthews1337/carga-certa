@@ -32,3 +32,4 @@ Thumbs.db
 
 # Snapshots que o MCP do Playwright despeja ao navegar
 .playwright-mcp/
+TODO_LIST.md
