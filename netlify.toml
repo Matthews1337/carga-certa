@@ -40,31 +40,10 @@
   to = "/index.html"
   status = 200
 
-# Cabecalhos de seguranca basicos. O app e 100% autenticado e nao deve ser
-# embutido em iframe de terceiros.
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-
-    # HSTS: o navegador passa a recusar HTTP neste endereco por um ano.
-    #
-    # Hoje e redundante - todo *.netlify.app ja esta na lista de preload
-    # embutida nos navegadores (o TLD .app inteiro esta), entao nem a primeira
-    # visita sai em HTTP. Fica aqui para o dia do dominio proprio: um
-    # cargacerta.com.br nasce FORA dessa lista, e sem este cabecalho a primeira
-    # visita numa Wi-Fi publica poderia ser rebaixada para HTTP por quem
-    # controla a rede (SSL stripping) - e ai sim a senha trafegaria aberta.
-    #
-    # Sem "preload" de proposito: entrar na lista e quase irreversivel, e so
-    # vale decidir isso com o dominio definitivo em maos.
-    Strict-Transport-Security = "max-age=31536000"
-
-# Os assets do Vite levam hash no nome, entao podem ser cacheados para sempre.
-# O index.html nao pode: e ele que aponta para o bundle novo a cada deploy.
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+# Cabecalhos HTTP: NAO declare aqui.
+#
+# Todos - CSP, HSTS, X-Frame-Options, cache dos assets - sao gerados no build
+# pelo plugin apps/web/plugins/cabecalhos.ts, que grava apps/web/dist/_headers.
+# A CSP depende da URL do Supabase e do hash do script do tema, que mudam; e a
+# Netlify nao documenta o que acontece quando _headers e netlify.toml definem
+# cabecalhos para o mesmo caminho. Um lugar so, sem precedencia para adivinhar.

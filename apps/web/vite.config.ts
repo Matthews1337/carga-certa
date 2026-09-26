@@ -4,11 +4,22 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv } from 'vite';
 
+import { cabecalhosDeSeguranca, type ModoCsp } from './plugins/cabecalhos';
 import { problemasDoAmbiente } from './src/lib/env';
 
 const raiz = fileURLToPath(new URL('.', import.meta.url));
 
+/*
+  Em `relatorio`, a CSP so avisa no console o que bloquearia. Troque para
+  `bloqueio` depois de alguns dias usando o app sem aparecer aviso legitimo -
+  e rode o teste de ponta a ponta antes, porque uma politica errada em
+  bloqueio quebra a tela sem mensagem nenhuma para o usuario.
+*/
+const MODO_CSP: ModoCsp = 'relatorio';
+
 export default defineConfig(({ command, mode }) => {
+  const env = loadEnv(mode, raiz, 'VITE_');
+
   /*
     Recusa o build quando as variaveis do Supabase estao erradas.
 
@@ -23,12 +34,16 @@ export default defineConfig(({ command, mode }) => {
     Supabase nenhum.
   */
   if (command === 'build') {
-    const problema = problemasDoAmbiente(loadEnv(mode, raiz, 'VITE_'));
+    const problema = problemasDoAmbiente(env);
     if (problema) throw new Error(`\n\n${problema}\n`);
   }
 
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      cabecalhosDeSeguranca({ urlSupabase: env.VITE_SUPABASE_URL, modo: MODO_CSP }),
+    ],
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
