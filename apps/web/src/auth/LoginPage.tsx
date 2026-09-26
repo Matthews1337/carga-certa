@@ -97,7 +97,7 @@ export function LoginPage() {
           <CardTitle className="text-2xl">Carga Certa</CardTitle>
           <CardDescription>
             {criando
-              ? 'Crie sua conta para comecar a registrar os gastos'
+              ? 'Crie sua conta para começar a registrar os gastos'
               : 'Entre para acompanhar seus fretes e gastos'}
           </CardDescription>
         </CardHeader>
@@ -109,7 +109,7 @@ export function LoginPage() {
                 <Input
                   {...form.register('nome')}
                   autoComplete="name"
-                  placeholder="Joao da Silva"
+                  placeholder="João da Silva"
                   aria-invalid={!!form.formState.errors.nome}
                 />
               </Campo>
@@ -120,7 +120,7 @@ export function LoginPage() {
                 {...form.register('email')}
                 type="email"
                 autoComplete="email"
-                placeholder="voce@exemplo.com"
+                placeholder="nome@exemplo.com"
                 aria-invalid={!!form.formState.errors.email}
               />
             </Campo>
@@ -152,7 +152,7 @@ export function LoginPage() {
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            {criando ? 'Ja tem conta?' : 'Ainda nao tem conta?'}{' '}
+            {criando ? 'Já tem conta?' : 'Ainda não tem conta?'}{' '}
             <button
               type="button"
               className="font-medium text-foreground underline underline-offset-4"
@@ -194,7 +194,7 @@ function traduzir(mensagem: string): string {
   const mapa: Record<string, string> = {
     'Invalid login credentials': 'E-mail ou senha incorretos.',
     'Email not confirmed': 'Confirme seu e-mail antes de entrar.',
-    'User already registered': 'Ja existe uma conta com este e-mail.',
+    'User already registered': 'Já existe uma conta com este e-mail.',
     'Password should be at least 6 characters':
       'A senha precisa de pelo menos 6 caracteres.',
   };

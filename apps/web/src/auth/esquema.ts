@@ -15,7 +15,7 @@ export type Modo = 'entrar' | 'criar';
  */
 export const esquemaEntrada = z.object({
   nome: z.string().trim().optional(),
-  email: z.string().trim().email('E-mail invalido'),
+  email: z.string().trim().email('E-mail inválido'),
   senha: z.string().min(8, 'A senha precisa de pelo menos 8 caracteres'),
 });
 

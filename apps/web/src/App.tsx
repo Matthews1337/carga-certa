@@ -45,7 +45,7 @@ export function App() {
           <Route path="/painel" element={<EmBreve titulo="Painel" />} />
           <Route path="/viagens" element={<EmBreve titulo="Viagens" />} />
           <Route path="/fretes" element={<EmBreve titulo="Fretes" />} />
-          <Route path="/veiculos" element={<EmBreve titulo="Veiculos" />} />
+          <Route path="/veiculos" element={<EmBreve titulo="Veículos" />} />
           <Route path="/contratantes" element={<EmBreve titulo="Contratantes" />} />
           <Route path="/documentos" element={<EmBreve titulo="Documentos" />} />
         </Route>

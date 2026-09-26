@@ -30,7 +30,7 @@ describe('problemaNaUrlSupabase', () => {
   it('rejeita so o project ref, com o formato esperado na mensagem', () => {
     // Primeiro erro real em producao: "Invalid supabaseUrl".
     const erro = problemaNaUrlSupabase('mgtsaqvdlrlnvdmscghh');
-    expect(erro).toContain('nao e uma URL');
+    expect(erro).toContain('não é uma URL');
     expect(erro).toContain('https://<ref>.supabase.co');
   });
 
@@ -39,7 +39,7 @@ describe('problemaNaUrlSupabase', () => {
     // cliente montava /rest/v1/auth/v1/signup.
     const erro = problemaNaUrlSupabase(`${REMOTA}/rest/v1`);
     expect(erro).toContain('caminho a mais');
-    expect(erro).toContain(`Use so o dominio: ${REMOTA}`);
+    expect(erro).toContain(`Use só o domínio: ${REMOTA}`);
   });
 
   it('rejeita qualquer outro caminho, query ou fragmento', () => {
@@ -53,8 +53,8 @@ describe('problemaNaUrlSupabase', () => {
   });
 
   it('rejeita ausencia', () => {
-    expect(problemaNaUrlSupabase(undefined)).toContain('nao esta definida');
-    expect(problemaNaUrlSupabase('   ')).toContain('nao esta definida');
+    expect(problemaNaUrlSupabase(undefined)).toContain('não está definida');
+    expect(problemaNaUrlSupabase('   ')).toContain('não está definida');
   });
 });
 
@@ -77,12 +77,12 @@ describe('problemaNaChaveSupabase', () => {
   });
 
   it('rejeita o que nao e chave, como a URL colada no campo errado', () => {
-    expect(problemaNaChaveSupabase(REMOTA)).toContain('nao parece uma anon key');
-    expect(problemaNaChaveSupabase('a.b.c')).toContain('nao parece uma anon key');
+    expect(problemaNaChaveSupabase(REMOTA)).toContain('não parece uma anon key');
+    expect(problemaNaChaveSupabase('a.b.c')).toContain('não parece uma anon key');
   });
 
   it('rejeita ausencia', () => {
-    expect(problemaNaChaveSupabase('')).toContain('nao esta definida');
+    expect(problemaNaChaveSupabase('')).toContain('não está definida');
   });
 });
 

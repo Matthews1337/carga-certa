@@ -9,7 +9,7 @@ export function RequireAuth() {
 
   // Sem esta espera, o F5 numa rota interna piscaria a tela de login antes de a
   // sessao do localStorage ser lida.
-  if (carregando) return <Carregando texto="Verificando sessao..." />;
+  if (carregando) return <Carregando texto="Verificando sessão..." />;
 
   if (!session) {
     // `state` guarda para onde o usuario queria ir, para voltar apos o login.

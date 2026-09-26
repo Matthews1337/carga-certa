@@ -24,7 +24,7 @@ const queryClient = new QueryClient({
 });
 
 const raiz = document.getElementById('root');
-if (!raiz) throw new Error('Elemento #root nao encontrado no index.html');
+if (!raiz) throw new Error('Elemento #root não encontrado no index.html');
 
 createRoot(raiz).render(
   <StrictMode>

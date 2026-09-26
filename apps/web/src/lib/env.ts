@@ -20,26 +20,26 @@ const HOSTS_LOCAIS = new Set(['localhost', '127.0.0.1', '[::1]']);
 
 const ONDE_CORRIGIR =
   'Local: apps/web/.env.local. Netlify: Site configuration -> Environment ' +
-  'variables, e depois um novo deploy - o valor e gravado no bundle durante o build.';
+  'variables, e depois um novo deploy - o valor é gravado no bundle durante o build.';
 
 /** Devolve a mensagem de erro, ou null quando a URL serve. */
 export function problemaNaUrlSupabase(valor: string | undefined): string | null {
   const v = valor?.trim();
-  if (!v) return 'VITE_SUPABASE_URL nao esta definida.';
+  if (!v) return 'VITE_SUPABASE_URL não está definida.';
 
   let url: URL;
   try {
     url = new URL(v);
   } catch {
     return (
-      `VITE_SUPABASE_URL nao e uma URL: "${v}". ` +
+      `VITE_SUPABASE_URL não é uma URL: "${v}". ` +
       'Use o Project URL do painel (Project Settings -> API), no formato ' +
       'https://<ref>.supabase.co'
     );
   }
 
   if (url.protocol !== 'https:' && url.protocol !== 'http:') {
-    return `VITE_SUPABASE_URL precisa comecar com https://, recebi "${v}".`;
+    return `VITE_SUPABASE_URL precisa começar com https://, recebi "${v}".`;
   }
 
   // http so faz sentido no stack local. Em producao o site e https, e o
@@ -53,7 +53,7 @@ export function problemaNaUrlSupabase(valor: string | undefined): string | null 
   if (url.pathname !== '/' || url.search || url.hash) {
     return (
       `VITE_SUPABASE_URL tem um caminho a mais: "${v}". ` +
-      `Use so o dominio: ${url.origin}`
+      `Use só o domínio: ${url.origin}`
     );
   }
 
@@ -66,15 +66,15 @@ export function normalizarUrlSupabase(valor: string): string {
 }
 
 const CHAVE_SECRETA =
-  'VITE_SUPABASE_ANON_KEY contem a chave SECRETA (service_role). Ela ignora ' +
-  'toda a RLS, e tudo que comeca com VITE_ vai para o navegador de qualquer ' +
-  'visitante. Troque pela anon key - e se esta chave ja foi publicada alguma ' +
+  'VITE_SUPABASE_ANON_KEY contém a chave SECRETA (service_role). Ela ignora ' +
+  'toda a RLS, e tudo que começa com VITE_ vai para o navegador de qualquer ' +
+  'visitante. Troque pela anon key - e se esta chave já foi publicada alguma ' +
   'vez, gere uma nova no painel do Supabase.';
 
 /** Devolve a mensagem de erro, ou null quando a chave serve. */
 export function problemaNaChaveSupabase(valor: string | undefined): string | null {
   const v = valor?.trim();
-  if (!v) return 'VITE_SUPABASE_ANON_KEY nao esta definida.';
+  if (!v) return 'VITE_SUPABASE_ANON_KEY não está definida.';
 
   // Formato novo de chaves do Supabase.
   if (v.startsWith('sb_secret_')) return CHAVE_SECRETA;
@@ -88,7 +88,7 @@ export function problemaNaChaveSupabase(valor: string | undefined): string | nul
   if (papel === 'anon') return null;
 
   return (
-    'VITE_SUPABASE_ANON_KEY nao parece uma anon key do Supabase. Use a anon ' +
+    'VITE_SUPABASE_ANON_KEY não parece uma anon key do Supabase. Use a anon ' +
     '(ou publishable) key de Project Settings -> API.'
   );
 }
@@ -118,7 +118,7 @@ export function problemasDoAmbiente(env: {
 
   if (problemas.length === 0) return null;
   return (
-    'Configuracao do Supabase invalida:\n' +
+    'Configuração do Supabase inválida:\n' +
     [...problemas, ONDE_CORRIGIR].map((p) => `  - ${p}`).join('\n')
   );
 }

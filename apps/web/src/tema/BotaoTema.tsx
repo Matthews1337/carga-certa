@@ -8,7 +8,7 @@ import { proximoTema, type Tema } from '@/tema/tema';
 const APARENCIA: Record<Tema, { rotulo: string; Icone: LucideIcon }> = {
   claro: { rotulo: 'claro', Icone: Sun },
   escuro: { rotulo: 'escuro', Icone: Moon },
-  sistema: { rotulo: 'automatico', Icone: MonitorCog },
+  sistema: { rotulo: 'automático', Icone: MonitorCog },
 };
 
 /**

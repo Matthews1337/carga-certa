@@ -8,6 +8,7 @@ import {
   uuidv7,
   type FormaPagamento,
   type StatusDespesa,
+  type StatusViagem,
 } from '@carga-certa/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Paperclip } from 'lucide-react';
@@ -56,7 +57,7 @@ const esquema = z.object({
     .refine((v) => {
       const n = parseValorDigitado(v);
       return n !== null && n > 0;
-    }, 'Valor invalido'),
+    }, 'Valor inválido'),
   dataHora: z.string().min(1, 'Informe a data'),
   categoriaId: z.string().uuid('Escolha a categoria'),
   formaPagamento: z.enum(FORMA_PAGAMENTO),
@@ -228,7 +229,7 @@ export function DespesaFormDialog({
               />
             </Campo>
 
-            <Campo rotulo="Situacao">
+            <Campo rotulo="Situação">
               <Controller
                 control={form.control}
                 name="status"
@@ -273,7 +274,7 @@ export function DespesaFormDialog({
               />
             </Campo>
 
-            <Campo rotulo="Veiculo">
+            <Campo rotulo="Veículo">
               <Controller
                 control={form.control}
                 name="veiculoId"
@@ -296,11 +297,11 @@ export function DespesaFormDialog({
             </Campo>
           </div>
 
-          <Campo rotulo="Descricao">
+          <Campo rotulo="Descrição">
             <Input {...form.register('descricao')} placeholder="Diesel S10, 180 litros" />
           </Campo>
 
-          <Campo rotulo="Comprovante" dica="JPG, PNG, WEBP ou PDF, ate 5 MB">
+          <Campo rotulo="Comprovante" dica="JPG, PNG, WEBP ou PDF, até 5 MB">
             <div className="flex items-center gap-3">
               <Button
                 type="button"
@@ -313,7 +314,7 @@ export function DespesaFormDialog({
               </Button>
               <span className="min-w-0 truncate text-sm text-muted-foreground">
                 {arquivo?.name ??
-                  (despesa?.comprovante_path ? 'Comprovante ja anexado' : 'Nenhum arquivo')}
+                  (despesa?.comprovante_path ? 'Comprovante já anexado' : 'Nenhum arquivo')}
               </span>
               <input
                 ref={inputArquivo}
@@ -421,5 +422,5 @@ function descreverViagem(inicioEm: string | null, status: string): string {
   const quando = inicioEm
     ? new Date(inicioEm).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
     : 'sem data';
-  return `${quando} · ${status.toLowerCase().replace('_', ' ')}`;
+  return `${quando} · ${ROTULOS.statusViagem[status as StatusViagem] ?? status}`;
 }

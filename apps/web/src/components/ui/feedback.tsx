@@ -36,7 +36,7 @@ export function ErroConsulta({ erro, className }: { erro: unknown; className?: s
     >
       <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" aria-hidden />
       <div>
-        <p className="font-medium text-destructive">Nao foi possivel carregar</p>
+        <p className="font-medium text-destructive">Não foi possível carregar</p>
         <p className="mt-1 text-muted-foreground">{mensagem}</p>
       </div>
     </div>

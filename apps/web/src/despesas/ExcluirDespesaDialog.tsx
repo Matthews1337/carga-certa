@@ -39,8 +39,8 @@ export function ExcluirDespesaDialog({
             {despesa
               ? `${formatarBRL(despesa.valor)} em ${despesa.categoria?.nome ?? 'categoria removida'}.`
               : null}{' '}
-            A exclusao e logica: o registro sai das listas e some tambem do celular no proximo
-            sync, mas continua no banco para o historico.
+            A exclusão é lógica: o registro sai das listas e some também do celular no próximo
+            sync, mas continua no banco para o histórico.
           </DialogDescription>
         </DialogHeader>
 

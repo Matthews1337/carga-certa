@@ -72,7 +72,7 @@ export function DespesasPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Despesas</h1>
           <p className="text-sm text-muted-foreground">
-            Gastos do caminhao e do motorista, dentro e fora de frete.
+            Gastos do caminhão e do motorista, dentro e fora de frete.
           </p>
         </div>
         <Button
@@ -88,8 +88,8 @@ export function DespesasPage() {
       </header>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Totalizador rotulo="Total no periodo" valor={resumo.total} destaque />
-        <Totalizador rotulo="Caminhao" valor={resumo.veiculo} />
+        <Totalizador rotulo="Total no período" valor={resumo.total} destaque />
+        <Totalizador rotulo="Caminhão" valor={resumo.veiculo} />
         <Totalizador rotulo="Motorista" valor={resumo.pessoal} />
         <Totalizador rotulo="Administrativo" valor={resumo.admin} />
       </div>
@@ -104,7 +104,7 @@ export function DespesasPage() {
             />
           </FiltroCampo>
 
-          <FiltroCampo rotulo="Ate">
+          <FiltroCampo rotulo="Até">
             <Input
               type="date"
               value={filtros.ate ?? ''}
@@ -131,7 +131,7 @@ export function DespesasPage() {
             </Select>
           </FiltroCampo>
 
-          <FiltroCampo rotulo="Vinculo">
+          <FiltroCampo rotulo="Vínculo">
             <Select
               value={filtros.vinculo ?? TODOS}
               onValueChange={(v) =>
@@ -149,7 +149,7 @@ export function DespesasPage() {
             </Select>
           </FiltroCampo>
 
-          <FiltroCampo rotulo="Situacao">
+          <FiltroCampo rotulo="Situação">
             <Select
               value={filtros.status ?? TODOS}
               onValueChange={(v) => alterar('status', v === TODOS ? undefined : (v as StatusDespesa))}
@@ -176,7 +176,7 @@ export function DespesasPage() {
         <ErroConsulta erro={despesas.error} />
       ) : despesas.data.length === 0 ? (
         <Vazio
-          titulo="Nenhuma despesa no periodo"
+          titulo="Nenhuma despesa no período"
           descricao="Ajuste os filtros ou registre o primeiro gasto."
           acao={
             <Button
@@ -198,11 +198,11 @@ export function DespesasPage() {
               <TableRow>
                 <TableHead>Data</TableHead>
                 <TableHead>Categoria</TableHead>
-                <TableHead>Descricao</TableHead>
-                <TableHead>Vinculo</TableHead>
+                <TableHead>Descrição</TableHead>
+                <TableHead>Vínculo</TableHead>
                 <TableHead>Pagamento</TableHead>
                 <TableHead className="text-right">Valor</TableHead>
-                <TableHead className="w-28 text-right">Acoes</TableHead>
+                <TableHead className="w-28 text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -289,8 +289,8 @@ export function DespesasPage() {
             <TableFooter>
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={5} className="text-sm text-muted-foreground">
-                  {despesas.data.length} lancamento{despesas.data.length === 1 ? '' : 's'}
-                  {' · canceladas nao entram no total'}
+                  {despesas.data.length} lançamento{despesas.data.length === 1 ? '' : 's'}
+                  {' · canceladas não entram no total'}
                 </TableCell>
                 <TableCell className="tabular text-right text-base font-semibold">
                   {formatarBRL(resumo.total)}

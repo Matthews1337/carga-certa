@@ -21,7 +21,7 @@ describe('esquemaEntrada', () => {
   it('rejeita e-mail invalido', () => {
     const r = esquemaEntrada.safeParse({ ...valido, email: 'nao-e-email' });
     expect(r.success).toBe(false);
-    expect(r.error?.issues[0]?.message).toBe('E-mail invalido');
+    expect(r.error?.issues[0]?.message).toBe('E-mail inválido');
   });
 
   it('rejeita senha curta', () => {

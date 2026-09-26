@@ -237,7 +237,7 @@ export async function subirComprovante(
 ): Promise<string> {
   const extensao = EXTENSOES[arquivo.type];
   if (!extensao) {
-    throw new Error('Formato nao aceito. Envie JPG, PNG, WEBP ou PDF.');
+    throw new Error('Formato não aceito. Envie JPG, PNG, WEBP ou PDF.');
   }
 
   const caminho = caminhoComprovante(pilotoId, despesaId, extensao);

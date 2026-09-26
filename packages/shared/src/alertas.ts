@@ -69,9 +69,9 @@ export function situacaoManutencao(params: {
 /** Texto curto para a lista de pendencias. */
 export function descreverVencimento(validade: Date): string {
   const dias = diasAte(validade);
-  if (dias < -1) return `vencido ha ${Math.abs(dias)} dias`;
+  if (dias < -1) return `vencido há ${Math.abs(dias)} dias`;
   if (dias === -1) return 'vencido ontem';
   if (dias === 0) return 'vence hoje';
-  if (dias === 1) return 'vence amanha';
+  if (dias === 1) return 'vence amanhã';
   return `vence em ${dias} dias`;
 }

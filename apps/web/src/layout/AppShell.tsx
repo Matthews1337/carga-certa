@@ -31,7 +31,7 @@ const SECOES = [
   { para: '/despesas', rotulo: 'Despesas', icone: Receipt },
   { para: '/viagens', rotulo: 'Viagens', icone: Route },
   { para: '/fretes', rotulo: 'Fretes', icone: Wallet },
-  { para: '/veiculos', rotulo: 'Veiculos', icone: Truck },
+  { para: '/veiculos', rotulo: 'Veículos', icone: Truck },
   { para: '/contratantes', rotulo: 'Contratantes', icone: Building2 },
   { para: '/documentos', rotulo: 'Documentos', icone: FileText },
 ] as const;
@@ -120,7 +120,7 @@ export function EmBreve({ titulo }: { titulo: string }) {
       <Construction className="size-8 text-muted-foreground" aria-hidden />
       <h1 className="text-xl font-semibold">{titulo}</h1>
       <p className="max-w-sm text-sm text-muted-foreground">
-        Esta secao ainda nao foi construida. A fatia de Despesas esta completa e serve de modelo
+        Esta seção ainda não foi construída. A fatia de Despesas está completa e serve de modelo
         para as demais.
       </p>
     </div>
