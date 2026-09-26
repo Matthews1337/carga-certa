@@ -4,9 +4,24 @@ React 19 + Vite + Tailwind 4, falando direto com o Supabase pelo PostgREST. Sem
 backend proprio no meio: quem decide o que cada usuario enxerga e a RLS.
 
 ```powershell
-cp .env.example .env.local
-corepack pnpm dev          # http://localhost:5173
+corepack pnpm dev          # http://localhost:5173, contra o Supabase do Docker
 ```
+
+### Qual banco cada comando usa
+
+| Comando | Le | Banco |
+|---|---|---|
+| `pnpm dev` | `.env.development` (versionado) | sempre o local, do Docker |
+| `pnpm build` / `pnpm preview` na sua maquina | `.env.local` | o que estiver nele |
+| build da Netlify | variaveis do painel da Netlify | producao |
+
+O `.env.development` vence o `.env.local` no dev - e isso que impede o dev de
+alterar dados reais por um `.env.local` esquecido. Para apontar o dev para outro
+banco de proposito, crie `.env.development.local` (ignorado pelo git); o terminal
+avisa enquanto ele existir.
+
+O `.env.local` so e necessario para rodar o build de producao localmente. Copie
+de `.env.example`.
 
 ## Estrutura
 

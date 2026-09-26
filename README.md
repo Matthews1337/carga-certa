@@ -28,13 +28,21 @@ permite `calcularResultadoViagem()` rodar igual nos dois apps e num teste em Nod
 
 ```powershell
 corepack pnpm install
-corepack pnpm test         # 56 testes, sem rede e sem banco
+corepack pnpm test         # testes unitarios, sem rede e sem banco
 corepack pnpm typecheck
 corepack pnpm dev          # app web em http://localhost:5173
 ```
 
-O web precisa de `apps/web/.env.local` - copie de `apps/web/.env.example`, que ja
-vem apontando para o Supabase local.
+**O `pnpm dev` sempre usa o banco local, do Docker** - nao precisa configurar
+nada. Quem garante e o [apps/web/.env.development](apps/web/.env.development),
+que o Vite so le no dev e que tem prioridade sobre o `.env.local`: um `.env.local`
+esquecido apontando para producao nao alcanca o dev. O terminal do dev diz qual
+banco esta em uso, avisa se o Docker estiver parado e grita se alguem apontar o
+dev para um banco remoto.
+
+A conta que voce usa no site da Netlify **nao existe** no banco local - sao
+bancos separados. Crie uma conta local em "Criar agora" (a confirmacao de e-mail
+esta desligada no local); ela some a cada `db:reset`.
 
 O `corepack` vem com o Node e dispensa instalar o pnpm globalmente. Depois de
 `corepack enable` (uma vez, como administrador no Windows), `pnpm` funciona
