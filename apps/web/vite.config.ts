@@ -20,4 +20,39 @@ export default defineConfig({
   server: {
     port: 5173,
   },
+
+  build: {
+    /*
+      O aviso padrao dispara em 500 kB e aqui seria ruido: o chunk de
+      dependencias e grande DE PROPOSITO, para ser cacheado inteiro. Elevar
+      para 800 kB nao e varrer para baixo do tapete - e mover o alarme para
+      onde ele volta a significar alguma coisa. Se o vendor passar disso,
+      alguem instalou algo pesado e vale olhar.
+    */
+    chunkSizeWarningLimit: 800,
+
+    rollupOptions: {
+      output: {
+        /*
+          Um unico chunk para todas as dependencias, separado do codigo do app.
+
+          O ganho nao e na primeira visita - o total baixado e o mesmo. E nas
+          seguintes: sem a divisao, cada deploy troca o hash do arquivo unico e
+          o motorista rebaixa 236 kB mesmo que so um texto tenha mudado. Com
+          ela, o pedaco pesado fica no cache e volta so o codigo do app.
+          Importa mais aqui do que na media: uso diario, conexao ruim.
+
+          POR QUE UM SO, e nao um por biblioteca: separar o React do que depende
+          dele quebra a pagina com "Cannot read properties of undefined
+          (reading 'useLayoutEffect')". A ordem de avaliacao entre chunks nao
+          garante que o React esteja pronto quando um pacote que o consome no
+          topo do modulo e executado. O erro nao aparece no build - so no
+          navegador, em tela branca. Mantenha tudo junto.
+        */
+        manualChunks(id) {
+          return id.includes('node_modules') ? 'vendor' : undefined;
+        },
+      },
+    },
+  },
 });
