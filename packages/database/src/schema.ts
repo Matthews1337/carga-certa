@@ -39,6 +39,7 @@ import { appSchema, tableSchema } from '@nozbe/watermelondb';
  */
 export const COLUNAS_INSTANTE: Readonly<Record<string, readonly string[]>> = {
   viagem: ['inicio_em', 'fim_em'],
+  posicao_viagem: ['registrado_em'],
   parada: ['chegada_em', 'saida_em'],
   despesa: ['data_hora'],
   receita: ['recebido_em'],
@@ -84,7 +85,13 @@ export const TABELAS_SINCRONIZADAS = [
   'cidade',
 ] as const;
 
-/** Espelha `public.sync_writable_tables()`. */
+/**
+ * Espelha `public.sync_writable_tables()`, na mesma ordem: e nela que o push
+ * grava, pai antes de filho.
+ *
+ * `posicao_viagem` esta aqui e nao em TABELAS_SINCRONIZADAS: as posicoes do GPS
+ * sobem, mas nao descem. So o aparelho que gravou a trilha precisa dela.
+ */
 export const TABELAS_GRAVAVEIS = [
   'piloto',
   'cnh',
@@ -93,15 +100,16 @@ export const TABELAS_GRAVAVEIS = [
   'contratante',
   'frete',
   'viagem',
+  'posicao_viagem',
   'carga',
   'parada',
   'categoria_despesa',
+  'estabelecimento',
   'despesa',
   'abastecimento',
   'manutencao',
   'receita',
   'fechamento_viagem',
-  'estabelecimento',
 ] as const;
 
 export type TabelaSincronizada = (typeof TABELAS_SINCRONIZADAS)[number];
@@ -112,12 +120,38 @@ const timestamps = [
   { name: 'updated_at', type: 'number' },
 ] as const;
 
+/**
+ * Colunas da versao 2, declaradas uma vez e usadas no schema E no passo de
+ * migrations.ts. Escritas duas vezes, bastaria um `isOptional` diferente para o
+ * aparelho que migrou ficar com um banco diferente do que instalou do zero.
+ */
+export const COLUNAS_ROTA_VIAGEM = [
+  { name: 'origem_nome', type: 'string', isOptional: true },
+  { name: 'origem_lat', type: 'number', isOptional: true },
+  { name: 'origem_lng', type: 'number', isOptional: true },
+  { name: 'destino_nome', type: 'string', isOptional: true },
+  { name: 'destino_lat', type: 'number', isOptional: true },
+  { name: 'destino_lng', type: 'number', isOptional: true },
+  { name: 'rota_polyline', type: 'string', isOptional: true },
+  { name: 'km_previsto', type: 'number', isOptional: true },
+] as const;
+
+export const COLUNAS_POSICAO_VIAGEM = [
+  { name: 'viagem_id', type: 'string', isIndexed: true },
+  { name: 'latitude', type: 'number' },
+  { name: 'longitude', type: 'number' },
+  { name: 'precisao_m', type: 'number', isOptional: true },
+  { name: 'registrado_em', type: 'number', isIndexed: true },
+  ...timestamps,
+] as const;
+
 // -----------------------------------------------------------------------------
 // Schema
 // -----------------------------------------------------------------------------
 
 export const schema = appSchema({
-  version: 1,
+  // v2: origem, destino e rota na viagem; tabela posicao_viagem. Ver migrations.ts.
+  version: 2,
   tables: [
     // ---------------------------------------------------------------------
     // Catalogos: descem no pull, so o estabelecimento sobe no push
@@ -309,8 +343,16 @@ export const schema = appSchema({
         { name: 'km_total', type: 'number', isOptional: true },
         { name: 'status', type: 'string', isIndexed: true },
         { name: 'observacao', type: 'string', isOptional: true },
+        // v2
+        ...COLUNAS_ROTA_VIAGEM,
         ...timestamps,
       ],
+    }),
+
+    // v2. Sobe no push, nao desce no pull (ver TABELAS_GRAVAVEIS).
+    tableSchema({
+      name: 'posicao_viagem',
+      columns: [...COLUNAS_POSICAO_VIAGEM],
     }),
 
     tableSchema({

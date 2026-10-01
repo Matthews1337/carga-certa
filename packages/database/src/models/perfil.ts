@@ -1,6 +1,6 @@
 import { Model } from '@nozbe/watermelondb';
 import { date, field, readonly, text } from '@nozbe/watermelondb/decorators';
-import { diasAte, situacaoVencimento, type SituacaoVencimento } from '@carga-certa/shared';
+import { dataLocal, diasAte, situacaoVencimento, type SituacaoVencimento } from '@carga-certa/shared';
 
 /**
  * Perfil do usuario e sua CNH.
@@ -27,18 +27,6 @@ export class Piloto extends Model {
 
   @readonly @date('created_at') createdAt!: Date;
   @readonly @date('updated_at') updatedAt!: Date;
-}
-
-/**
- * Le 'AAAA-MM-DD' como data local.
- *
- * `new Date('2030-04-12')` interpreta a string como meia-noite UTC, que no
- * horario de Brasilia e dia 11 as 21h. Um documento venceria um dia antes na
- * tela - e o app existe justamente para o motorista nao ser pego por isso.
- */
-export function dataLocal(iso: string): Date {
-  const [ano, mes, dia] = iso.split('-').map(Number);
-  return new Date(ano ?? 1970, (mes ?? 1) - 1, dia ?? 1);
 }
 
 export class Cnh extends Model {

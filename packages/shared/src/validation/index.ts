@@ -4,3 +4,4 @@ export * from './cpf';
 export * from './cnpj';
 export * from './placa';
 export * from './cnh';
+export * from './telefone';

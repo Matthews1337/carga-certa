@@ -139,6 +139,14 @@ describe('parseValorDigitado', () => {
     expect(parseValorDigitado('1.234.567')).toBe(1234567);
   });
 
+  it('um ponto seguido de tres digitos e milhar: dinheiro nao tem tres casas', () => {
+    expect(parseValorDigitado('7.500')).toBe(7500);
+    expect(parseValorDigitado('12.800')).toBe(12800);
+    // Com duas casas continua decimal (teclado do celular).
+    expect(parseValorDigitado('75.50')).toBe(75.5);
+    expect(parseValorDigitado('1234.567')).toBe(1234.567);
+  });
+
   it('rejeita o que nao e numero', () => {
     expect(parseValorDigitado('')).toBeNull();
     expect(parseValorDigitado('abc')).toBeNull();

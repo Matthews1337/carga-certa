@@ -81,6 +81,7 @@ export class Viagem extends Model {
     frete: { type: 'belongs_to', key: 'frete_id' },
     despesa: { type: 'has_many', foreignKey: 'viagem_id' },
     parada: { type: 'has_many', foreignKey: 'viagem_id' },
+    posicao_viagem: { type: 'has_many', foreignKey: 'viagem_id' },
     fechamento_viagem: { type: 'has_many', foreignKey: 'viagem_id' },
   };
 
@@ -95,6 +96,19 @@ export class Viagem extends Model {
   @field('status') status!: StatusViagem;
   @text('observacao') observacao!: string | null;
 
+  // Rota planejada no web (v2). Origem e destino sao pontos do mapa, e nao
+  // cidades do IBGE: um porto ou uma fazenda nao e uma cidade.
+  @text('origem_nome') origemNome!: string | null;
+  @field('origem_lat') origemLat!: number | null;
+  @field('origem_lng') origemLng!: number | null;
+  @text('destino_nome') destinoNome!: string | null;
+  @field('destino_lat') destinoLat!: number | null;
+  @field('destino_lng') destinoLng!: number | null;
+  /** Encoded polyline, ja simplificada. Ler com `decodificarPolyline` do shared. */
+  @field('rota_polyline') rotaPolyline!: string | null;
+  /** Distancia da rota calculada, em km. O rodado de verdade e o `km`. */
+  @field('km_previsto') kmPrevisto!: number | null;
+
   @relation('frete', 'frete_id') frete!: Relation<Frete>;
   @relation('veiculo', 'veiculo_tracao_id') veiculoTracao!: Relation<Veiculo>;
   @relation('veiculo', 'veiculo_reboque_id') veiculoReboque!: Relation<Veiculo>;
@@ -104,6 +118,7 @@ export class Viagem extends Model {
 
   @children('parada') paradas!: Query<Parada>;
   @children('despesa') despesas!: Query<Despesa>;
+  @children('posicao_viagem') posicoes!: Query<PosicaoViagem>;
 
   @readonly @date('created_at') createdAt!: Date;
   @readonly @date('updated_at') updatedAt!: Date;
@@ -122,6 +137,36 @@ export class Viagem extends Model {
     if (this.odometroFinal === null || this.odometroInicial === null) return null;
     return this.odometroFinal - this.odometroInicial;
   }
+}
+
+/**
+ * Ponto do GPS gravado durante a viagem.
+ *
+ * So sobe: o pull nao traz de volta (ver TABELAS_GRAVAVEIS), porque so o
+ * aparelho que gravou a trilha precisa dela - o web le a ultima posicao pela
+ * view `vw_posicao_atual`. Criado e nunca editado.
+ *
+ * Se a viagem for excluida em outro aparelho, o servidor descarta em silencio
+ * as posicoes que ainda estavam na fila, em vez de travar o sync com erro.
+ */
+export class PosicaoViagem extends Model {
+  static override table = 'posicao_viagem';
+
+  static override associations: Associations = {
+    viagem: { type: 'belongs_to', key: 'viagem_id' },
+  };
+
+  @field('latitude') latitude!: number;
+  @field('longitude') longitude!: number;
+  /** Raio de incerteza do GPS, em metros. */
+  @field('precisao_m') precisaoM!: number | null;
+  /** Hora do GPS. A posicao pode subir horas depois, quando o sinal voltar. */
+  @date('registrado_em') registradoEm!: Date;
+
+  @relation('viagem', 'viagem_id') viagem!: Relation<Viagem>;
+
+  @readonly @date('created_at') createdAt!: Date;
+  @readonly @date('updated_at') updatedAt!: Date;
 }
 
 export class Carga extends Model {

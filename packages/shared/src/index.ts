@@ -17,4 +17,7 @@ export * from './mes';
 export * from './resumo-mensal';
 export * from './alertas';
 export * from './storage';
+export * from './polyline';
+export * from './rota';
+export * from './recebimento';
 export * from './validation';

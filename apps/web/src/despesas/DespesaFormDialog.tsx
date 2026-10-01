@@ -47,6 +47,7 @@ import {
   subirComprovante,
   type DespesaDaLista,
 } from '@/despesas/api';
+import { cidadeDoLugar } from '@/fretes/apresentacao';
 
 const SEM_VINCULO = 'nenhum';
 
@@ -265,7 +266,7 @@ export function DespesaFormDialog({
                       <SelectItem value={SEM_VINCULO}>Sem viagem</SelectItem>
                       {(viagens.data ?? []).map((v) => (
                         <SelectItem key={v.id} value={v.id}>
-                          {descreverViagem(v.inicio_em, v.status)}
+                          {descreverViagem(v)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -418,9 +419,19 @@ function agruparCategorias(
   }));
 }
 
-function descreverViagem(inicioEm: string | null, status: string): string {
-  const quando = inicioEm
-    ? new Date(inicioEm).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+/** "Rio Verde, GO → Santos, SP · 05 de out. · Planejada". Sem rota, so data e situacao. */
+function descreverViagem(v: {
+  inicio_em: string | null;
+  status: string;
+  origem_nome: string | null;
+  destino_nome: string | null;
+}): string {
+  const quando = v.inicio_em
+    ? new Date(v.inicio_em).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
     : 'sem data';
-  return `${quando} · ${ROTULOS.statusViagem[status as StatusViagem] ?? status}`;
+  const trajeto =
+    v.origem_nome && v.destino_nome
+      ? `${cidadeDoLugar(v.origem_nome)} → ${cidadeDoLugar(v.destino_nome)} · `
+      : '';
+  return `${trajeto}${quando} · ${ROTULOS.statusViagem[v.status as StatusViagem] ?? v.status}`;
 }

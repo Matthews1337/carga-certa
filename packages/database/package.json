@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@nozbe/watermelondb": "^0.28.0",
+    "@types/node": "^26.6.2",
     "typescript": "^5.6.3"
   }
 }

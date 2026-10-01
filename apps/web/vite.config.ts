@@ -68,8 +68,13 @@ export default defineConfig(({ command, mode }) => {
         para 800 kB nao e varrer para baixo do tapete - e mover o alarme para
         onde ele volta a significar alguma coisa. Se o vendor passar disso,
         alguem instalou algo pesado e vale olhar.
+
+        1100 desde os fretes: o maior pedaco passou a ser o do MapLibre
+        (~1.060 kB, 285 kB gzip), que so baixa quando um mapa abre - ver
+        manualChunks. O vendor segue em ~760 kB; o alarme agora pega o
+        MapLibre crescendo ou o vendor dobrando de tamanho.
       */
-      chunkSizeWarningLimit: 800,
+      chunkSizeWarningLimit: 1100,
 
       rollupOptions: {
         output: {
@@ -88,9 +93,16 @@ export default defineConfig(({ command, mode }) => {
             garante que o React esteja pronto quando um pacote que o consome no
             topo do modulo e executado. O erro nao aparece no build - so no
             navegador, em tela branca. Mantenha tudo junto.
+
+            A UNICA excecao e o MapLibre: sozinho ele pesa mais que o resto das
+            dependencias, e so a tela de fretes usa. No vendor, todo motorista
+            o baixaria no login. Separar e seguro porque ele nao importa o
+            React - e um bundle fechado, com os proprios workers dentro - e a
+            regra acima e sobre quem depende do React.
           */
           manualChunks(id) {
-            return id.includes('node_modules') ? 'vendor' : undefined;
+            if (!id.includes('node_modules')) return undefined;
+            return id.includes('maplibre-gl') ? 'maplibre' : 'vendor';
           },
         },
       },

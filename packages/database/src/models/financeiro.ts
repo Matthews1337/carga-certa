@@ -3,6 +3,7 @@ import { date, field, readonly, relation, text } from '@nozbe/watermelondb/decor
 import type Relation from '@nozbe/watermelondb/Relation';
 import type { Associations } from '@nozbe/watermelondb/Model';
 import {
+  dataLocal,
   situacaoManutencao,
   type EscopoCategoria,
   type FormaPagamento,
@@ -15,7 +16,6 @@ import {
 
 import type { Estabelecimento } from './catalogos';
 import type { Veiculo } from './frota';
-import { dataLocal } from './perfil';
 import type { Frete, Viagem } from './operacao';
 
 export class CategoriaDespesa extends Model {

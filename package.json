@@ -12,7 +12,9 @@
     "db:reset": "supabase db reset",
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --local > packages/shared/src/database.types.ts",
-    "db:test": "docker cp supabase/tests/rls_sync.sql supabase_db_Carga-Certa:/tmp/rls_sync.sql && docker exec supabase_db_Carga-Certa psql -U postgres -d postgres -q -f /tmp/rls_sync.sql"
+    "db:test": "docker cp supabase/tests/rls_sync.sql supabase_db_Carga-Certa:/tmp/rls_sync.sql && docker exec supabase_db_Carga-Certa psql -U postgres -d postgres -q -f /tmp/rls_sync.sql",
+    "db:test:rota": "docker cp supabase/tests/rota_posicao.sql supabase_db_Carga-Certa:/tmp/rota_posicao.sql && docker exec supabase_db_Carga-Certa psql -U postgres -d postgres -q -f /tmp/rota_posicao.sql",
+    "functions:serve": "supabase functions serve"
   },
   "devDependencies": {
     "supabase": "^2.117.0",

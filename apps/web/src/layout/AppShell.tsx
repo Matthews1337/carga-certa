@@ -8,7 +8,6 @@ import {
   Receipt,
   Route,
   Truck,
-  Wallet,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -22,15 +21,16 @@ import { BotaoTema } from '@/tema/BotaoTema';
 /**
  * Navegacao do app.
  *
- * O web espelha o mobile, entao a lista ja contempla todas as secoes. As que
- * ainda nao existem levam para a tela "em breve" em vez de sumirem do menu: o
- * mapa completo do produto fica visivel desde o comeco.
+ * As secoes que ainda nao existem levam para a tela "em breve" em vez de
+ * sumirem do menu: o mapa completo do produto fica visivel desde o comeco.
+ *
+ * Viagens nao esta aqui de proposito (2026-09-28): no web, a viagem aparece
+ * dentro do card do frete, e viagem sem frete e registrada pelo celular.
  */
 const SECOES = [
   { para: '/painel', rotulo: 'Painel', icone: LayoutDashboard },
   { para: '/despesas', rotulo: 'Despesas', icone: Receipt },
-  { para: '/viagens', rotulo: 'Viagens', icone: Route },
-  { para: '/fretes', rotulo: 'Fretes', icone: Wallet },
+  { para: '/fretes', rotulo: 'Fretes', icone: Route },
   { para: '/veiculos', rotulo: 'Veículos', icone: Truck },
   { para: '/contratantes', rotulo: 'Contratantes', icone: Building2 },
   { para: '/documentos', rotulo: 'Documentos', icone: FileText },

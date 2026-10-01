@@ -936,6 +936,67 @@ export type Database = {
         }
         Relationships: []
       }
+      posicao_viagem: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          latitude: number
+          longitude: number
+          piloto_id: string
+          precisao_m: number | null
+          registrado_em: string
+          updated_at: string
+          viagem_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          latitude: number
+          longitude: number
+          piloto_id?: string
+          precisao_m?: number | null
+          registrado_em: string
+          updated_at?: string
+          viagem_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          piloto_id?: string
+          precisao_m?: number | null
+          registrado_em?: string
+          updated_at?: string
+          viagem_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posicao_viagem_piloto_id_fkey"
+            columns: ["piloto_id"]
+            isOneToOne: false
+            referencedRelation: "piloto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posicao_viagem_viagem_id_fkey"
+            columns: ["viagem_id"]
+            isOneToOne: false
+            referencedRelation: "viagem"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posicao_viagem_viagem_id_fkey"
+            columns: ["viagem_id"]
+            isOneToOne: false
+            referencedRelation: "vw_resultado_viagem"
+            referencedColumns: ["viagem_id"]
+          },
+        ]
+      }
       receita: {
         Row: {
           created_at: string
@@ -1192,10 +1253,14 @@ export type Database = {
           condicao_trajeto_id: string | null
           created_at: string
           deleted_at: string | null
+          destino_lat: number | null
+          destino_lng: number | null
+          destino_nome: string | null
           fim_em: string | null
           frete_id: string | null
           id: string
           inicio_em: string | null
+          km_previsto: number | null
           km_total: number | null
           natureza_reboque:
             | Database["public"]["Enums"]["natureza_veiculo"]
@@ -1204,7 +1269,11 @@ export type Database = {
           observacao: string | null
           odometro_final: number | null
           odometro_inicial: number | null
+          origem_lat: number | null
+          origem_lng: number | null
+          origem_nome: string | null
           piloto_id: string
+          rota_polyline: string | null
           status: Database["public"]["Enums"]["status_viagem"]
           updated_at: string
           veiculo_reboque_id: string | null
@@ -1216,10 +1285,14 @@ export type Database = {
           condicao_trajeto_id?: string | null
           created_at?: string
           deleted_at?: string | null
+          destino_lat?: number | null
+          destino_lng?: number | null
+          destino_nome?: string | null
           fim_em?: string | null
           frete_id?: string | null
           id?: string
           inicio_em?: string | null
+          km_previsto?: number | null
           km_total?: number | null
           natureza_reboque?:
             | Database["public"]["Enums"]["natureza_veiculo"]
@@ -1228,7 +1301,11 @@ export type Database = {
           observacao?: string | null
           odometro_final?: number | null
           odometro_inicial?: number | null
+          origem_lat?: number | null
+          origem_lng?: number | null
+          origem_nome?: string | null
           piloto_id?: string
+          rota_polyline?: string | null
           status?: Database["public"]["Enums"]["status_viagem"]
           updated_at?: string
           veiculo_reboque_id?: string | null
@@ -1240,10 +1317,14 @@ export type Database = {
           condicao_trajeto_id?: string | null
           created_at?: string
           deleted_at?: string | null
+          destino_lat?: number | null
+          destino_lng?: number | null
+          destino_nome?: string | null
           fim_em?: string | null
           frete_id?: string | null
           id?: string
           inicio_em?: string | null
+          km_previsto?: number | null
           km_total?: number | null
           natureza_reboque?:
             | Database["public"]["Enums"]["natureza_veiculo"]
@@ -1252,7 +1333,11 @@ export type Database = {
           observacao?: string | null
           odometro_final?: number | null
           odometro_inicial?: number | null
+          origem_lat?: number | null
+          origem_lng?: number | null
+          origem_nome?: string | null
           piloto_id?: string
+          rota_polyline?: string | null
           status?: Database["public"]["Enums"]["status_viagem"]
           updated_at?: string
           veiculo_reboque_id?: string | null
@@ -1312,6 +1397,31 @@ export type Database = {
       }
     }
     Views: {
+      vw_posicao_atual: {
+        Row: {
+          latitude: number | null
+          longitude: number | null
+          precisao_m: number | null
+          registrado_em: string | null
+          viagem_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posicao_viagem_viagem_id_fkey"
+            columns: ["viagem_id"]
+            isOneToOne: false
+            referencedRelation: "viagem"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posicao_viagem_viagem_id_fkey"
+            columns: ["viagem_id"]
+            isOneToOne: false
+            referencedRelation: "vw_resultado_viagem"
+            referencedColumns: ["viagem_id"]
+          },
+        ]
+      }
       vw_resultado_viagem: {
         Row: {
           consumo_medio_km_l: number | null

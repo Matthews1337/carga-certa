@@ -4,6 +4,7 @@ import { formatarCpf, isCpfValido } from '../validation/cpf';
 import { formatarCnpj, isCnpjValido, limparCnpj } from '../validation/cnpj';
 import { formatarPlaca, isPlacaValida, padraoDaPlaca } from '../validation/placa';
 import { categoriaAtende, isCategoriaCnhValida, normalizarCategoriaCnh } from '../validation/cnh';
+import { ehCelular, isTelefoneValido, limparTelefone } from '../validation/telefone';
 
 describe('CPF', () => {
   it('aceita CPF valido com e sem pontuacao', () => {
@@ -116,5 +117,39 @@ describe('CNH', () => {
 
   it('sem exigencia, qualquer categoria serve (reboque nao tem CNH minima)', () => {
     expect(categoriaAtende('B', null)).toBe(true);
+  });
+});
+
+describe('Telefone', () => {
+  it('aceita celular e fixo com DDD, com ou sem mascara', () => {
+    expect(isTelefoneValido('(62) 99999-8888')).toBe(true);
+    expect(isTelefoneValido('62999998888')).toBe(true);
+    expect(isTelefoneValido('(62) 3212-3456')).toBe(true);
+  });
+
+  it('tira o +55 de quem cola do WhatsApp', () => {
+    expect(limparTelefone('+55 62 99999-8888')).toBe('62999998888');
+    expect(limparTelefone('+55 (62) 3212-3456')).toBe('6232123456');
+  });
+
+  it('nao confunde o DDD 55 com o codigo do pais', () => {
+    expect(limparTelefone('(55) 99999-8888')).toBe('55999998888');
+    expect(limparTelefone('+55 55 99999-8888')).toBe('55999998888');
+  });
+
+  it('tira o 0 do interurbano', () => {
+    expect(limparTelefone('062 3212-3456')).toBe('6232123456');
+    expect(limparTelefone('0 62 99999-8888')).toBe('62999998888');
+  });
+
+  it('recusa sem DDD, DDD com zero e celular sem o 9', () => {
+    expect(isTelefoneValido('99999-8888')).toBe(false);
+    expect(isTelefoneValido('(06) 3212-3456')).toBe(false);
+    expect(isTelefoneValido('(62) 89999-8888')).toBe(false);
+  });
+
+  it('distingue celular de fixo', () => {
+    expect(ehCelular('(62) 99999-8888')).toBe(true);
+    expect(ehCelular('(62) 3212-3456')).toBe(false);
   });
 });

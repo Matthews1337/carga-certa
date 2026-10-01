@@ -4,6 +4,7 @@ import type Query from '@nozbe/watermelondb/Query';
 import type Relation from '@nozbe/watermelondb/Relation';
 import type { Associations } from '@nozbe/watermelondb/Model';
 import {
+  dataLocal,
   formatarPlaca,
   situacaoVencimento,
   type CarroceriaVeiculo,
@@ -12,7 +13,6 @@ import {
 } from '@carga-certa/shared';
 
 import type { TipoDocumento, TipoVeiculo } from './catalogos';
-import { dataLocal } from './perfil';
 
 export class Veiculo extends Model {
   static override table = 'veiculo';

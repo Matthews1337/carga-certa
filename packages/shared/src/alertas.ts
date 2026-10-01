@@ -24,12 +24,26 @@ export function diasAte(data: Date, hoje: Date = new Date()): number {
   return Math.round((a - b) / 86_400_000);
 }
 
+/**
+ * Le 'AAAA-MM-DD' (coluna `date` do banco) como data LOCAL.
+ *
+ * `new Date('2030-04-12')` interpreta a string como meia-noite UTC, que no
+ * horario de Brasilia e dia 11 as 21h. Um documento apareceria vencendo um dia
+ * antes - e o app existe justamente para o motorista nao ser pego por isso.
+ */
+export function dataLocal(iso: string): Date {
+  const [ano, mes, dia] = iso.split('-').map(Number);
+  return new Date(ano ?? 1970, (mes ?? 1) - 1, dia ?? 1);
+}
+
 export function situacaoVencimento(
   validade: Date | null | undefined,
-  antecedencia = ANTECEDENCIA_PADRAO,
+  // Tipo explicito: inferido do `as const`, so aceitaria exatamente 7 e 30.
+  antecedencia: { critico: number; atencao: number } = ANTECEDENCIA_PADRAO,
+  hoje: Date = new Date(),
 ): SituacaoVencimento | null {
   if (!validade) return null;
-  const dias = diasAte(validade);
+  const dias = diasAte(validade, hoje);
   if (dias < 0) return 'VENCIDO';
   if (dias <= antecedencia.critico) return 'CRITICO';
   if (dias <= antecedencia.atencao) return 'ATENCAO';
@@ -67,8 +81,8 @@ export function situacaoManutencao(params: {
 }
 
 /** Texto curto para a lista de pendencias. */
-export function descreverVencimento(validade: Date): string {
-  const dias = diasAte(validade);
+export function descreverVencimento(validade: Date, hoje: Date = new Date()): string {
+  const dias = diasAte(validade, hoje);
   if (dias < -1) return `vencido há ${Math.abs(dias)} dias`;
   if (dias === -1) return 'vencido ontem';
   if (dias === 0) return 'vence hoje';

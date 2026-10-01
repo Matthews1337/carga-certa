@@ -9,7 +9,14 @@ supabase/
 │   ├── 20260919120000_init_schema.sql   # enums, tabelas, índices, triggers, view
 │   ├── 20260919120100_rls.sql           # RLS e policies
 │   ├── 20260919120200_storage.sql       # buckets e policies de arquivo
-│   └── 20260919120300_sync_watermelondb.sql  # RPC pull_changes / push_changes
+│   ├── 20260919120300_sync_watermelondb.sql  # RPC pull_changes / push_changes
+│   ├── 20260926170000_acentua_catalogos.sql  # nomes dos catálogos acentuados
+│   └── 20260929230000_rota_e_posicao_da_viagem.sql  # rota da viagem, GPS, ordem do push
+├── functions/
+│   └── rotas/                           # proxy do OpenRouteService (busca e rota)
+├── tests/
+│   ├── rls_sync.sql                     # pnpm db:test (exige db:reset antes)
+│   └── rota_posicao.sql                 # pnpm db:test:rota (roda em rollback)
 └── seed.sql                             # catálogos
 ```
 
@@ -131,6 +138,44 @@ export async function sync(database) {
 Chame em três momentos: ao abrir o app, ao recuperar conexão
 (`NetInfo.addEventListener`) e depois de gravar algo relevante.
 
+## Rota da viagem e posições do GPS
+
+A viagem guarda origem e destino (nome e coordenadas), a rota prevista como
+*encoded polyline* já simplificada (`packages/shared/src/polyline.ts`) e o
+`km_previsto`. O km rodado de verdade continua sendo o `km_total`, dos odômetros.
+
+`posicao_viagem` guarda o caminho gravado pelo celular. Ela **sobe no push mas
+não desce no pull**: só o aparelho que gravou a trilha precisa dela. O web lê a
+última posição de cada viagem pela view `vw_posicao_atual`, que ignora posição
+com hora no futuro (relógio de celular adiantado).
+
+A última posição **não** é copiada para a viagem por trigger: o celular reenvia a
+viagem inteira a cada edição, e a posição antiga guardada nele sobrescreveria a
+nova.
+
+Posição de viagem excluída, ou de outro usuário, é **descartada em silêncio**, e
+não recusada com erro como nas outras tabelas: o push aborta o lote no primeiro
+erro, e uma viagem excluída em outro aparelho travaria o sync para sempre.
+
+O push grava as tabelas na ordem de `sync_writable_tables()`, pai antes de filho.
+Antes gravava na ordem das chaves do jsonb (as mais curtas primeiro), e um posto
+novo com um abastecimento nele, no mesmo lote, falhava na chave estrangeira.
+
+## Edge Function `rotas`
+
+Busca de lugares, endereço de um ponto clicado no mapa e rota de caminhão
+(`driving-hgv`) pelo OpenRouteService. Existe para a chave do ORS nunca ir para o
+navegador. Só usuário logado passa: a função confere o token com o Auth.
+
+```bash
+# local: copie functions/.env.example para functions/.env e preencha a chave
+pnpm functions:serve
+
+# produção
+supabase secrets set ORS_API_KEY=<chave>
+supabase functions deploy rotas
+```
+
 ## Carga das cidades
 
 `cidade` está no pull mas fora do seed: são cerca de 5.570 linhas do IBGE e o
@@ -183,3 +228,10 @@ ganhar `deleted_at` ela sumia para si mesma e o comando falhava. O mesmo filtro
 impedia o `pull_changes` de montar a lista `deleted`, então uma exclusão jamais
 alcançaria os outros aparelhos. Agora quem filtra registro excluído é a consulta
 do app, não a policy.
+
+`pnpm db:test:rota` roda [tests/rota_posicao.sql](tests/rota_posicao.sql): 12 casos
+da rota e das posições (última posição pela hora do GPS, relógio adiantado,
+posição fora do pull, posição em viagem alheia ou excluída descartada sem erro,
+isolamento entre usuários) e da ordem do push. Roda inteiro numa transação que
+termina em ROLLBACK, então serve em cima dos dados de teste do banco local, sem
+`db:reset`.

@@ -69,12 +69,18 @@ describe('montarCsp', () => {
   });
 
   it('fecha o vazamento via url() de CSS, que e o risco do estilo inline', () => {
-    expect(diretiva('img-src')).toBe("'self'");
+    // data: e blob: (icones do MapLibre) nao fazem requisicao de rede. Um
+    // HOST aqui e que abriria a porta.
+    expect(diretiva('img-src')).toBe("'self' data: blob:");
     expect(diretiva('font-src')).toBe("'self'");
   });
 
-  it('libera conexao so para o host exato do projeto, sem barra final', () => {
-    expect(csp).toContain(`connect-src 'self' ${SUPABASE};`);
+  it('libera conexao so para o host exato do projeto e o dos mapas', () => {
+    expect(diretiva('connect-src')).toBe(`'self' ${SUPABASE} https://tiles.openfreemap.org`);
+  });
+
+  it('libera o worker do MapLibre, que nasce de um blob:', () => {
+    expect(diretiva('worker-src')).toBe("'self' blob:");
   });
 
   it('NUNCA usa curinga - o atacante criaria o proprio projeto no Supabase', () => {

@@ -1,33 +1,32 @@
-import { schemaMigrations } from '@nozbe/watermelondb/Schema/migrations';
+import { addColumns, createTable, schemaMigrations } from '@nozbe/watermelondb/Schema/migrations';
+
+import { COLUNAS_POSICAO_VIAGEM, COLUNAS_ROTA_VIAGEM } from './schema';
 
 /**
  * Migrations do SQLite local.
  *
- * Vazio porque a versao 1 e a inicial - nao ha de onde migrar. A partir daqui,
- * toda alteracao em schema.ts exige duas coisas juntas: subir `version` no
- * appSchema e acrescentar o passo correspondente abaixo.
+ * Toda alteracao em schema.ts exige duas coisas juntas: subir `version` no
+ * appSchema e acrescentar o passo correspondente abaixo. O teste em
+ * __tests__/schema.test.ts acusa se a versao do schema passar a da ultima
+ * migration.
  *
  * Esquecer o passo nao da erro de compilacao. O WatermelonDB detecta que o banco
  * do aparelho esta numa versao sem caminho de migracao, apaga tudo e recria do
  * zero. O usuario perde o que ainda nao tinha subido - que, num app feito para
  * funcionar sem sinal, e exatamente o dado mais caro que existe.
  *
- * Exemplo do passo, para quando a primeira mudanca vier:
- *
- *   import { addColumns } from '@nozbe/watermelondb/Schema/migrations';
- *
- *   migrations: [
- *     {
- *       toVersion: 2,
- *       steps: [
- *         addColumns({
- *           table: 'despesa',
- *           columns: [{ name: 'nota_fiscal', type: 'string', isOptional: true }],
- *         }),
- *       ],
- *     },
- *   ]
+ * Passo so ACRESCENTA. O WatermelonDB nao sabe remover nem alterar coluna; e o
+ * que sai do servidor pode continuar existindo aqui, ignorado.
  */
 export const migrations = schemaMigrations({
-  migrations: [],
+  migrations: [
+    {
+      // Supabase: 20260929230000_rota_e_posicao_da_viagem.sql
+      toVersion: 2,
+      steps: [
+        addColumns({ table: 'viagem', columns: [...COLUNAS_ROTA_VIAGEM] }),
+        createTable({ name: 'posicao_viagem', columns: [...COLUNAS_POSICAO_VIAGEM] }),
+      ],
+    },
+  ],
 });

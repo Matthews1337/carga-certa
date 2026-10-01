@@ -65,7 +65,9 @@ export const chavesDespesa = {
   lista: (filtros: FiltrosDespesa) => ['despesas', 'lista', filtros] as const,
   categorias: ['categorias-despesa'] as const,
   viagens: ['viagens-abertas'] as const,
-  veiculos: ['veiculos-ativos'] as const,
+  // Sob o prefixo ['veiculos']: cadastrar ou editar um veiculo invalida
+  // ['veiculos'] e atualiza esta lista junto (ver veiculos/api.ts).
+  veiculos: ['veiculos', 'ativos'] as const,
 };
 
 export async function listarDespesas(filtros: FiltrosDespesa): Promise<DespesaDaLista[]> {
@@ -126,12 +128,14 @@ export interface ViagemOpcao {
   id: string;
   status: string;
   inicio_em: string | null;
+  origem_nome: string | null;
+  destino_nome: string | null;
 }
 
 export async function listarViagens(): Promise<ViagemOpcao[]> {
   const { data, error } = await supabase
     .from('viagem')
-    .select('id, status, inicio_em')
+    .select('id, status, inicio_em, origem_nome, destino_nome')
     .is('deleted_at', null)
     .order('inicio_em', { ascending: false, nullsFirst: false })
     .limit(100);

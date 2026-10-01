@@ -56,7 +56,10 @@ export function somar(valores: readonly (number | string | null | undefined)[]):
  * Aceita "1.234,56" (teclado brasileiro), "1234.56" (teclado numerico do
  * celular) e "1234". A regra para desempatar: se ha virgula, ela e o separador
  * decimal e todo ponto e milhar. Sem virgula, o ponto e decimal - exceto quando
- * aparece mais de uma vez ("1.234.567"), que so pode ser milhar.
+ * aparece mais de uma vez ("1.234.567"), que so pode ser milhar, ou quando e um
+ * so seguido de exatamente tres digitos ("7.500"): dinheiro nao tem tres casas
+ * decimais, e quem digita o valor de um frete assim quer dizer sete mil e
+ * quinhentos, nao R$ 7,50.
  */
 export function parseValorDigitado(texto: string): number | null {
   const limpo = texto.trim().replace(/\s|R\$/g, '');
@@ -66,7 +69,7 @@ export function parseValorDigitado(texto: string): number | null {
   let normalizado: string;
   if (limpo.includes(',')) {
     normalizado = limpo.replace(/\./g, '').replace(',', '.');
-  } else if ((limpo.match(/\./g) ?? []).length > 1) {
+  } else if ((limpo.match(/\./g) ?? []).length > 1 || /^-?\d{1,3}\.\d{3}$/.test(limpo)) {
     normalizado = limpo.replace(/\./g, '');
   } else {
     normalizado = limpo;

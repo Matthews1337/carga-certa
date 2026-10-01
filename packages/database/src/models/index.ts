@@ -1,7 +1,7 @@
 import { Cidade, CondicaoTrajeto, Estabelecimento, TipoCarga, TipoDocumento, TipoVeiculo } from './catalogos';
 import { Cnh, Piloto } from './perfil';
 import { DocumentoVeiculo, Veiculo } from './frota';
-import { Carga, Contratante, Frete, Parada, Viagem } from './operacao';
+import { Carga, Contratante, Frete, Parada, PosicaoViagem, Viagem } from './operacao';
 import {
   Abastecimento,
   CategoriaDespesa,
@@ -40,6 +40,7 @@ export const models = [
   Contratante,
   Frete,
   Viagem,
+  PosicaoViagem,
   Carga,
   Parada,
   // Financeiro

@@ -10,8 +10,8 @@ import { AppShell, EmBreve } from '@/layout/AppShell';
   Cada secao de dominio vira um arquivo separado, baixado so quando a rota e
   visitada.
 
-  Existem Despesas e Painel; faltam cinco secoes (viagens, fretes, veiculos,
-  contratantes, documentos). Num arquivo unico, cada uma delas engordaria o
+  Existem Despesas, Painel, Fretes, Veiculos e Contratantes; falta Documentos.
+  Num arquivo unico, cada uma delas engordaria o
   download de TODO mundo, inclusive de quem nunca abre aquela tela.
 
   LoginPage fica fora de proposito: e a primeira tela de quem nao tem sessao,
@@ -22,6 +22,15 @@ const DespesasPage = lazy(() =>
 );
 const PainelPage = lazy(() =>
   import('@/painel/PainelPage').then((m) => ({ default: m.PainelPage })),
+);
+const VeiculosPage = lazy(() =>
+  import('@/veiculos/VeiculosPage').then((m) => ({ default: m.VeiculosPage })),
+);
+const ContratantesPage = lazy(() =>
+  import('@/contratantes/ContratantesPage').then((m) => ({ default: m.ContratantesPage })),
+);
+const FretesPage = lazy(() =>
+  import('@/fretes/FretesPage').then((m) => ({ default: m.FretesPage })),
 );
 
 export function App() {
@@ -51,10 +60,34 @@ export function App() {
               </Suspense>
             }
           />
-          <Route path="/viagens" element={<EmBreve titulo="Viagens" />} />
-          <Route path="/fretes" element={<EmBreve titulo="Fretes" />} />
-          <Route path="/veiculos" element={<EmBreve titulo="Veículos" />} />
-          <Route path="/contratantes" element={<EmBreve titulo="Contratantes" />} />
+          {/* Viagens saiu do web (2026-09-28): a viagem aparece dentro do card
+              do frete, e viagem sem frete e coisa do celular. Quem tinha o
+              endereco salvo cai nos fretes. */}
+          <Route path="/viagens" element={<Navigate to="/fretes" replace />} />
+          <Route
+            path="/fretes"
+            element={
+              <Suspense fallback={<Carregando />}>
+                <FretesPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/veiculos"
+            element={
+              <Suspense fallback={<Carregando />}>
+                <VeiculosPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/contratantes"
+            element={
+              <Suspense fallback={<Carregando />}>
+                <ContratantesPage />
+              </Suspense>
+            }
+          />
           <Route path="/documentos" element={<EmBreve titulo="Documentos" />} />
         </Route>
       </Route>

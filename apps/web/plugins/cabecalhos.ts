@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import type { Plugin, ResolvedConfig } from 'vite';
 
 import { normalizarUrlSupabase } from '../src/lib/env';
+import { HOST_DOS_MAPAS } from '../src/lib/mapa';
 
 /**
  * Cabecalhos HTTP de seguranca, gerados no build.
@@ -74,8 +75,16 @@ export function montarCsp({ html, urlSupabase }: { html: string; urlSupabase: st
     // de dados via url() - e img-src e font-src abaixo fecham exatamente isso.
     // O que impede XSS e o script-src, e esse continua sem 'unsafe-inline'.
     ['style-src', ["'self'", "'unsafe-inline'"]],
-    ['img-src', ["'self'"]],
+
+    // data: e blob: sao do MapLibre: os icones dos controles e o logo vem como
+    // SVG embutido no CSS. Nenhum dos dois reabre o vazamento via url() - um
+    // data: ou blob: nao faz requisicao de rede, entao nao tem para onde levar
+    // dado. O que fecharia a porta seria liberar um HOST aqui.
+    ['img-src', ["'self'", 'data:', 'blob:']],
     ['font-src', ["'self'"]],
+
+    // O MapLibre desenha o mapa num Web Worker criado a partir de um blob:.
+    ['worker-src', ["'self'", 'blob:']],
 
     // Para onde o JavaScript pode mandar dados. E esta linha que impede um
     // codigo malicioso - de campo de texto ou de dependencia comprometida -
@@ -84,7 +93,11 @@ export function montarCsp({ html, urlSupabase }: { html: string; urlSupabase: st
     // O host EXATO do projeto, nunca *.supabase.co: com o curinga, o atacante
     // criaria o proprio projeto no Supabase e mandaria o token para la,
     // passando pela regra.
-    ['connect-src', ["'self'", supabase]],
+    //
+    // O OpenFreeMap serve estilo, tiles, fontes e icones do mapa, todos neste
+    // host. Tambem exato: os tiles sao publicos, mas um curinga aqui seria o
+    // primeiro passo para liberar "so mais um" dominio.
+    ['connect-src', ["'self'", supabase, HOST_DOS_MAPAS]],
 
     // Plugins (Flash, Java). Nao existem mais, mas bloquear e padrao.
     ['object-src', ["'none'"]],
