@@ -1,4 +1,5 @@
 import {
+  fimDaViagem,
   parseNumeric,
   parseNumericOu0,
   somar,
@@ -32,6 +33,8 @@ export interface ViagemNaTela {
   id: string;
   status: StatusViagem;
   inicio_em: string | null;
+  /** Gravado ao concluir (aqui ou no celular); nulo enquanto nao acaba. */
+  fim_em: string | null;
   /** Dos odometros; nulo ate a viagem terminar. */
   km_total: number | null;
   km_previsto: number | null;
@@ -53,7 +56,7 @@ export interface PosicaoAtual {
 }
 
 /** Colunas de ViagemNaTela, mais deleted_at para filtrar o embed. */
-export const COLUNAS_VIAGEM = `id, status, inicio_em, km_total, km_previsto,
+export const COLUNAS_VIAGEM = `id, status, inicio_em, fim_em, km_total, km_previsto,
   origem_nome, origem_lat, origem_lng, destino_nome, destino_lat, destino_lng,
   rota_polyline, veiculo_tracao_id, veiculo_reboque_id, deleted_at`;
 
@@ -63,6 +66,7 @@ export function normalizarViagem(v: ViagemNaTela): ViagemNaTela {
     id: v.id,
     status: v.status,
     inicio_em: v.inicio_em,
+    fim_em: v.fim_em,
     km_total: parseNumeric(v.km_total),
     km_previsto: parseNumeric(v.km_previsto),
     origem_nome: v.origem_nome,
@@ -171,6 +175,19 @@ export async function gravarPeloPush(
 
 export function salvarViagem(viagem: RegistroViagem): Promise<void> {
   return gravarPeloPush({ viagem: [viagem] }, 'O veículo escolhido foi excluído. Escolha outro.');
+}
+
+/**
+ * "Viagem concluida", o botao do detalhe: status e fim, sem abrir o
+ * formulario. Update direto, e nao o push_changes: o push e um upsert, e o
+ * insert dele exigiria a linha inteira (veiculo_tracao_id nao tem default).
+ */
+export async function concluirViagem(v: Pick<ViagemNaTela, 'id' | 'inicio_em' | 'fim_em'>): Promise<void> {
+  const { error } = await supabase
+    .from('viagem')
+    .update({ status: 'CONCLUIDA', fim_em: fimDaViagem('CONCLUIDA', v.inicio_em, v.fim_em) })
+    .eq('id', v.id);
+  if (error) throw new Error(error.message);
 }
 
 // ------------------------------------------------------------- despesas ---

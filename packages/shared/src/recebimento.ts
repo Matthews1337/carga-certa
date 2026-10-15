@@ -10,7 +10,8 @@
  *
  * O "OU" cobre o contratante que desconta quebra ou avaria: ele paga menos que
  * o combinado, o motorista lanca o saldo com o valor que caiu, e o frete fica
- * verde mesmo assim - sem botao "dar como recebido" nem coluna nova.
+ * verde mesmo assim - sem marcar "recebido" a mao nem coluna nova. (O botao
+ * "Valor recebido" do detalhe lanca esse saldo: ver planoDoValorRecebido.)
  *
  * So conta o que tem data de recebimento: lancado e ainda nao caiu nao e
  * dinheiro na mao. E so ADIANTAMENTO e SALDO pagam o frete: estadia, extra e
@@ -73,5 +74,38 @@ export function resumirRecebimento({
     recebido: deCentavos(recebido),
     pagoDoFrete: deCentavos(pagoDoFrete),
     faltaReceber: deCentavos(Math.max(0, combinado - pagoDoFrete)),
+  };
+}
+
+/**
+ * O que o botao "Valor recebido" do detalhe faz (pedido do usuario em
+ * 2026-10-15): dar o frete por pago num clique.
+ *
+ *  - Adiantamento e saldo ja lancados e ainda nao caidos passam a caidos: o
+ *    clique confirma o que o motorista tinha anotado, sem lancar de novo.
+ *  - Se nenhum deles era o saldo, lanca um saldo com o que ainda falta do
+ *    combinado. Havendo saldo anotado, nao: ele e o pagamento final, e o que
+ *    falta e desconto (ver resumirRecebimento).
+ *
+ * Estadia, extra e devolucao de pedagio anotados ficam como estao: nao pagam
+ * o frete, e o clique e sobre o frete.
+ */
+export function planoDoValorRecebido<R extends RecebimentoParaResumo>({
+  valorCombinado,
+  recebimentos,
+}: {
+  valorCombinado: number | string;
+  recebimentos: readonly R[];
+}): { confirmar: R[]; saldoNovo: number } {
+  const pagam = recebimentos.filter((r) => TIPOS_QUE_PAGAM_O_FRETE.includes(r.tipo));
+  const anotados = pagam.filter((r) => r.recebidoEm === null || r.recebidoEm === undefined);
+
+  const centavos = (lista: readonly R[]) =>
+    lista.reduce((soma, r) => soma + paraCentavos(parseNumericOu0(r.valor)), 0);
+  const falta = paraCentavos(parseNumericOu0(valorCombinado)) - centavos(pagam);
+
+  return {
+    confirmar: anotados,
+    saldoNovo: anotados.some((r) => r.tipo === 'SALDO') ? 0 : deCentavos(Math.max(0, falta)),
   };
 }

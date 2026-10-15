@@ -1,4 +1,4 @@
-import { STATUS_VIAGEM, dataLocal, type StatusViagem } from '@carga-certa/shared';
+import { STATUS_VIAGEM, dataLocal, fimDaViagem, type StatusViagem } from '@carga-certa/shared';
 import { z } from 'zod';
 
 import type { Lugar } from '@/lib/rotas';
@@ -51,6 +51,8 @@ export type RegistroViagem = {
   veiculo_tracao_id: string;
   veiculo_reboque_id: string | null;
   inicio_em: string;
+  /** Pelo status: ver fimDaViagem. */
+  fim_em: string | null;
   status: StatusViagem;
   origem_nome: string;
   origem_lat: number;
@@ -99,21 +101,29 @@ export function inicioDaViagem(dia: string, gravado?: string | null): string {
   return gravado && diaLocal(gravado) === dia ? gravado : meioDiaLocal(dia);
 }
 
+/** Inicio e fim ja gravados, para a edicao nao atropelar o que o celular fez. */
+export interface DatasGravadas {
+  inicio_em: string | null;
+  fim_em: string | null;
+}
+
 /** Converte o formulario de viagem (sem frete) na linha do banco. */
 export function paraRegistroViagem(
   campos: CamposViagem,
   rota: RotaParaGravar | null,
   id: string,
-  inicioGravado?: string | null,
+  gravadas?: DatasGravadas,
 ): RegistroViagem {
   const { origem, destino } = campos;
   if (!origem || !destino) throw new Error('Origem e destino sao obrigatorios');
+  const inicio = inicioDaViagem(campos.inicio, gravadas?.inicio_em);
   return {
     id,
     frete_id: null,
     veiculo_tracao_id: campos.veiculoTracaoId,
     veiculo_reboque_id: campos.veiculoReboqueId === SEM_VINCULO ? null : campos.veiculoReboqueId,
-    inicio_em: inicioDaViagem(campos.inicio, inicioGravado),
+    inicio_em: inicio,
+    fim_em: fimDaViagem(campos.status, inicio, gravadas?.fim_em),
     status: campos.status,
     ...trechoDaViagem(origem, destino, rota),
   };

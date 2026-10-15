@@ -53,6 +53,13 @@ describe('paraRegistroViagem', () => {
     });
   });
 
+  it('concluida: fim gravado pelo celular fica; sem ele, agora', () => {
+    const gravadas = { inicio_em: meioDiaLocal('2026-10-15'), fim_em: new Date(2026, 9, 16, 9, 20).toISOString() };
+    expect(paraRegistroViagem({ ...base, status: 'CONCLUIDA' }, rota, 'v', gravadas).fim_em).toBe(gravadas.fim_em);
+    expect(paraRegistroViagem({ ...base, status: 'CONCLUIDA' }, rota, 'v').fim_em).not.toBeNull();
+    expect(paraRegistroViagem(base, rota, 'v', gravadas).fim_em).toBeNull();
+  });
+
   it('sem rota calculada, grava so os pontos', () => {
     const viagem = paraRegistroViagem(base, null, 'v');
     expect(viagem.rota_polyline).toBeNull();

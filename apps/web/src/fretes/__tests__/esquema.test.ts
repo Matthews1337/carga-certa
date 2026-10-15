@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { SEM_VINCULO, diaLocal, meioDiaLocal } from '@/viagens/esquema';
 
@@ -68,6 +68,26 @@ describe('paraRegistros', () => {
     expect(new Date(viagem.inicio_em).getHours()).toBe(12);
   });
 
+  describe('fim da viagem', () => {
+    afterEach(() => vi.useRealTimers());
+
+    it('concluir o frete grava agora como fim da viagem', () => {
+      const agora = new Date(2026, 9, 9, 16, 45);
+      vi.useFakeTimers({ now: agora });
+      expect(paraRegistros({ ...base, situacao: 'CONCLUIDO' }, rota, ids).viagem.fim_em).toBe(agora.toISOString());
+    });
+
+    it('frete reaberto: a viagem perde o fim', () => {
+      const original = {
+        situacao: 'CONCLUIDO' as const,
+        statusViagem: 'CONCLUIDA' as const,
+        inicioEm: meioDiaLocal('2026-10-05'),
+        fimEm: new Date(2026, 9, 7).toISOString(),
+      };
+      expect(paraRegistros({ ...base, situacao: 'EM_ANDAMENTO' }, rota, ids, original).viagem.fim_em).toBeNull();
+    });
+  });
+
   it('cancelar o frete cancela a viagem (o Painel deixa de contar)', () => {
     expect(paraRegistros({ ...base, situacao: 'CANCELADO' }, rota, ids).viagem.status).toBe('CANCELADA');
   });
@@ -78,6 +98,7 @@ describe('paraRegistros', () => {
       situacao: 'EM_ANDAMENTO' as const,
       statusViagem: 'PAUSADA' as const,
       inicioEm: inicioDoCelular,
+      fimEm: null,
     };
 
     it('mesmo dia: mantem a hora em que o celular iniciou', () => {
@@ -93,6 +114,13 @@ describe('paraRegistros', () => {
     it('situacao mudada no web: a viagem acompanha', () => {
       const { viagem } = paraRegistros({ ...base, situacao: 'CONCLUIDO' }, rota, ids, original);
       expect(viagem.status).toBe('CONCLUIDA');
+    });
+
+    it('mesma situacao: mantem o fim que o celular gravou', () => {
+      const fimDoCelular = new Date(2026, 9, 7, 18, 10).toISOString();
+      const concluido = { ...original, situacao: 'CONCLUIDO' as const, statusViagem: 'CONCLUIDA' as const, fimEm: fimDoCelular };
+      const { viagem } = paraRegistros({ ...base, situacao: 'CONCLUIDO' }, rota, ids, concluido);
+      expect(viagem.fim_em).toBe(fimDoCelular);
     });
 
     it('dia mudado no web: vale o novo dia, ao meio-dia', () => {

@@ -242,7 +242,10 @@ export const ROTULOS = {
   tipoEstabelecimento: Record<TipoEstabelecimento, string>;
 };
 
-/** Situacoes em que a viagem ainda aceita lancamento de despesa. */
+/**
+ * Situacoes da viagem que ainda nao acabou. O menu de viagem da despesa mostra
+ * estas e as encerradas no mes atual: ver entraNoMenuDeDespesa.
+ */
 export const VIAGEM_ABERTA: readonly StatusViagem[] = ['PLANEJADA', 'EM_ANDAMENTO', 'PAUSADA'];
 
 /** Despesas que entram no resultado. A view vw_resultado_viagem usa o mesmo corte. */

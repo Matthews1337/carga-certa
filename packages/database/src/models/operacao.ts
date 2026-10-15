@@ -123,7 +123,7 @@ export class Viagem extends Model {
   @readonly @date('created_at') createdAt!: Date;
   @readonly @date('updated_at') updatedAt!: Date;
 
-  /** Se ainda aceita lancamento de despesa. */
+  /** Se a viagem ainda nao acabou. Para o menu da despesa, ver entraNoMenuDeDespesa. */
   get aberta(): boolean {
     return VIAGEM_ABERTA.includes(this.status);
   }

@@ -1,4 +1,4 @@
-import { parseValorDigitado, type StatusFrete, type StatusViagem } from '@carga-certa/shared';
+import { fimDaViagem, parseValorDigitado, type StatusFrete, type StatusViagem } from '@carga-certa/shared';
 import { z } from 'zod';
 
 import {
@@ -68,6 +68,7 @@ export interface Original {
   situacao: SituacaoFrete;
   statusViagem: StatusViagem;
   inicioEm: string | null;
+  fimEm: string | null;
 }
 
 /**
@@ -89,6 +90,8 @@ export function paraRegistros(
   if (!origem || !destino) throw new Error('Origem e destino sao obrigatorios');
 
   const mesmaSituacao = original ? original.situacao === campos.situacao : false;
+  const statusViagem = mesmaSituacao && original ? original.statusViagem : STATUS_DA_VIAGEM[campos.situacao];
+  const inicio = inicioDaViagem(campos.inicio, original?.inicioEm);
 
   return {
     frete: {
@@ -102,8 +105,9 @@ export function paraRegistros(
       frete_id: ids.frete,
       veiculo_tracao_id: campos.veiculoTracaoId,
       veiculo_reboque_id: campos.veiculoReboqueId === SEM_VINCULO ? null : campos.veiculoReboqueId,
-      inicio_em: inicioDaViagem(campos.inicio, original?.inicioEm),
-      status: mesmaSituacao && original ? original.statusViagem : STATUS_DA_VIAGEM[campos.situacao],
+      inicio_em: inicio,
+      fim_em: fimDaViagem(statusViagem, inicio, original?.fimEm),
+      status: statusViagem,
       ...trechoDaViagem(origem, destino, rota),
     },
   };

@@ -1,5 +1,13 @@
-import { ROTULOS, formatarBRL, formatarKm, resumirRecebimento } from '@carga-certa/shared';
-import { Pencil } from 'lucide-react';
+import {
+  ROTULOS,
+  formatarBRL,
+  formatarKm,
+  planoDoValorRecebido,
+  resumirRecebimento,
+  somar,
+} from '@carga-certa/shared';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Check, CircleCheck, HandCoins } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,11 +15,12 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import type { FreteDaLista } from '@/fretes/api';
+import { Spinner } from '@/components/ui/feedback';
+import { chavesDespesa } from '@/despesas/api';
+import { chavesFretes, concluirFrete, receberOQueFalta, type FreteDaLista } from '@/fretes/api';
 import { Recebimentos } from '@/fretes/Recebimentos';
 import { ValorDoFrete } from '@/fretes/ValorDoFrete';
 import { cn } from '@/lib/utils';
@@ -20,6 +29,7 @@ import {
   ListaDeDespesas,
   MapaDoDetalhe,
   Numero,
+  RodapeDoDetalhe,
   useConjunto,
   useDespesasDaViagem,
 } from '@/viagens/DetalheDaViagem';
@@ -28,6 +38,10 @@ import {
  * Detalhe do frete, aberto pelo card: o mapa de verdade, as contas (saldo
  * liquido e o que ja caiu) e os recebimentos, que so se lancam aqui. Mapa e
  * despesas sao os mesmos do detalhe da viagem.
+ *
+ * O rodape fecha o frete em dois cliques (abrir o card, clicar): "Valor
+ * recebido" da o frete por pago (planoDoValorRecebido) e "Frete concluido"
+ * encerra frete e viagem.
  */
 export function FreteDetalheDialog({
   frete,
@@ -42,21 +56,14 @@ export function FreteDetalheDialog({
   return (
     <Dialog open={frete !== null} onOpenChange={(v) => !v && aoFechar()}>
       <DialogContent className="sm:max-w-3xl">
-        {frete ? <Conteudo frete={frete} aoFechar={aoFechar} aoEditar={aoEditar} /> : null}
+        {frete ? <Conteudo frete={frete} aoEditar={aoEditar} /> : null}
       </DialogContent>
     </Dialog>
   );
 }
 
-function Conteudo({
-  frete,
-  aoFechar,
-  aoEditar,
-}: {
-  frete: FreteDaLista;
-  aoFechar: () => void;
-  aoEditar: (frete: FreteDaLista) => void;
-}) {
+function Conteudo({ frete, aoEditar }: { frete: FreteDaLista; aoEditar: (frete: FreteDaLista) => void }) {
+  const queryClient = useQueryClient();
   const v = frete.viagem;
   const { consulta: despesas, total: totalDespesas } = useDespesasDaViagem(v?.id ?? null);
   const conjunto = useConjunto(v);
@@ -67,6 +74,26 @@ function Conteudo({
     recebimentos: frete.recebimentos.map((r) => ({ tipo: r.tipo, valor: r.valor, recebidoEm: r.recebido_em })),
   });
   const { km, previsto } = kmDaViagem(v);
+
+  const atualizar = (...chaves: (readonly string[])[]) =>
+    Promise.all(chaves.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
+  const plano = planoDoValorRecebido({
+    valorCombinado: frete.valor_total,
+    recebimentos: frete.recebimentos.map((r) => ({ ...r, recebidoEm: r.recebido_em })),
+  });
+  const receber = useMutation({
+    mutationFn: () => receberOQueFalta(frete.id, plano),
+    onSuccess: () => atualizar(chavesFretes.todos, ['painel']),
+  });
+  const concluir = useMutation({
+    mutationFn: () => concluirFrete(frete),
+    // A viagem concluida conta no Painel e muda de situacao no menu da despesa.
+    onSuccess: () => atualizar(chavesFretes.todos, ['painel'], chavesDespesa.viagens),
+  });
+
+  const recebido =
+    resumo.situacao !== 'A_RECEBER' || (plano.confirmar.length === 0 && plano.saldoNovo === 0);
+  const concluido = frete.status === 'CONCLUIDO' || frete.status === 'CANCELADO';
 
   return (
     <>
@@ -106,15 +133,48 @@ function Conteudo({
 
       <ListaDeDespesas temViagem={v !== null} consulta={despesas} />
 
-      <DialogFooter>
-        <Button variant="ghost" onClick={aoFechar}>
-          Fechar
+      <RodapeDoDetalhe
+        rotuloEditar="Editar frete"
+        aoEditar={() => aoEditar(frete)}
+        erro={receber.error ?? concluir.error}
+      >
+        <Button
+          variant="outline"
+          disabled={recebido || receber.isPending}
+          onClick={() => receber.mutate()}
+          title={recebido ? undefined : oQueOCliqueFaz(plano)}
+        >
+          {receber.isPending ? (
+            <Spinner />
+          ) : recebido ? (
+            <Check className="size-4" aria-hidden />
+          ) : (
+            <HandCoins className="size-4" aria-hidden />
+          )}
+          Valor recebido
         </Button>
-        <Button variant="outline" onClick={() => aoEditar(frete)}>
-          <Pencil className="size-4" aria-hidden />
-          Editar frete
+        <Button variant="accent" disabled={concluido || concluir.isPending} onClick={() => concluir.mutate()}>
+          {concluir.isPending ? (
+            <Spinner />
+          ) : concluido ? (
+            <Check className="size-4" aria-hidden />
+          ) : (
+            <CircleCheck className="size-4" aria-hidden />
+          )}
+          Frete concluído
         </Button>
-      </DialogFooter>
+      </RodapeDoDetalhe>
     </>
   );
+}
+
+/** O que o clique em "Valor recebido" vai gravar, no title do botao: nao ha confirmacao. */
+function oQueOCliqueFaz(plano: { confirmar: { valor: number }[]; saldoNovo: number }): string {
+  const partes: string[] = [];
+  if (plano.confirmar.length > 0) {
+    partes.push(`confirma ${formatarBRL(somar(plano.confirmar.map((r) => r.valor)))} já lançado`);
+  }
+  if (plano.saldoNovo > 0) partes.push(`lança ${formatarBRL(plano.saldoNovo)} de saldo por Pix`);
+  const texto = `${partes.join(' e ')}, caído hoje`;
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
 }

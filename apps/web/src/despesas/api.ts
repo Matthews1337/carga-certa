@@ -7,6 +7,7 @@ import {
   type ExtensaoArquivo,
   type FormaPagamento,
   type StatusDespesa,
+  type StatusViagem,
 } from '@carga-certa/shared';
 
 import { supabase } from '@/lib/supabase';
@@ -126,16 +127,21 @@ export async function listarCategorias(): Promise<CategoriaOpcao[]> {
 
 export interface ViagemOpcao {
   id: string;
-  status: string;
+  status: StatusViagem;
   inicio_em: string | null;
+  fim_em: string | null;
   origem_nome: string | null;
   destino_nome: string | null;
 }
 
+/**
+ * Todas, inclusive as encerradas: o formulario tira do menu as de meses
+ * anteriores (entraNoMenuDeDespesa), menos a que a despesa editada ja tem.
+ */
 export async function listarViagens(): Promise<ViagemOpcao[]> {
   const { data, error } = await supabase
     .from('viagem')
-    .select('id, status, inicio_em, origem_nome, destino_nome')
+    .select('id, status, inicio_em, fim_em, origem_nome, destino_nome')
     .is('deleted_at', null)
     .order('inicio_em', { ascending: false, nullsFirst: false })
     .limit(100);

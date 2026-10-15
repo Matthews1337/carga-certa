@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { Ponto } from '../polyline';
-import { resumirRecebimento, type RecebimentoParaResumo } from '../recebimento';
+import { planoDoValorRecebido, resumirRecebimento, type RecebimentoParaResumo } from '../recebimento';
 import { comprimentoKm, distanciaKm, dividirRota } from '../rota';
 
 const RIO_VERDE: Ponto = [-17.7923, -50.9192];
@@ -130,5 +130,44 @@ describe('resumirRecebimento', () => {
       recebimentos: [caiu('ADIANTAMENTO', 0.1), caiu('ADIANTAMENTO', '0.20')],
     });
     expect(r.situacao).toBe('RECEBIDO');
+  });
+});
+
+describe('planoDoValorRecebido', () => {
+  const caiu = '2026-10-01T15:00:00Z';
+  const plano = (recebimentos: (RecebimentoParaResumo & { id: string })[]) =>
+    planoDoValorRecebido({ valorCombinado: '12800.00', recebimentos });
+
+  it('nada lancado: lanca o combinado inteiro como saldo', () => {
+    expect(plano([])).toEqual({ confirmar: [], saldoNovo: 12800 });
+  });
+
+  it('adiantamento caido: lanca so o que falta', () => {
+    expect(plano([{ id: 'a', tipo: 'ADIANTAMENTO', valor: 5000, recebidoEm: caiu }]).saldoNovo).toBe(7800);
+  });
+
+  it('saldo anotado e nao caido: confirma o anotado, sem lancar outro', () => {
+    const saldo = { id: 's', tipo: 'SALDO' as const, valor: '7000.00', recebidoEm: null };
+    const r = plano([{ id: 'a', tipo: 'ADIANTAMENTO', valor: 5000, recebidoEm: caiu }, saldo]);
+    // Os 800 que faltam sao desconto: o saldo anotado e o pagamento final.
+    expect(r).toEqual({ confirmar: [saldo], saldoNovo: 0 });
+  });
+
+  it('adiantamento anotado: confirma e lanca o saldo do resto', () => {
+    const adiantamento = { id: 'a', tipo: 'ADIANTAMENTO' as const, valor: 5000, recebidoEm: null };
+    expect(plano([adiantamento])).toEqual({ confirmar: [adiantamento], saldoNovo: 7800 });
+  });
+
+  it('estadia anotada fica de fora e nao abate o combinado', () => {
+    const r = plano([{ id: 'e', tipo: 'ESTADIA', valor: 600, recebidoEm: null }]);
+    expect(r).toEqual({ confirmar: [], saldoNovo: 12800 });
+  });
+
+  it('conta em centavos', () => {
+    const r = planoDoValorRecebido({
+      valorCombinado: 0.3,
+      recebimentos: [{ id: 'a', tipo: 'ADIANTAMENTO', valor: 0.1, recebidoEm: caiu }],
+    });
+    expect(r.saldoNovo).toBe(0.2);
   });
 });

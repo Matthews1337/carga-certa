@@ -90,7 +90,12 @@ export function FreteFormDialog({
     mutationFn: async (campos: CamposFrete) => {
       const ids = { frete: frete?.id ?? uuidv7(), viagem: frete?.viagem?.id ?? uuidv7() };
       const original = frete?.viagem
-        ? { situacao: situacaoDe(frete.status), statusViagem: frete.viagem.status, inicioEm: frete.viagem.inicio_em }
+        ? {
+            situacao: situacaoDe(frete.status),
+            statusViagem: frete.viagem.status,
+            inicioEm: frete.viagem.inicio_em,
+            fimEm: frete.viagem.fim_em,
+          }
         : undefined;
       const { frete: registroFrete, viagem } = paraRegistros(campos, rota.rota, ids, original);
       await salvarFrete(registroFrete, viagem);

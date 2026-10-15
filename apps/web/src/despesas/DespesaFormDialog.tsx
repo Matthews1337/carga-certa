@@ -3,6 +3,7 @@ import {
   FORMA_PAGAMENTO,
   ROTULOS,
   STATUS_DESPESA,
+  entraNoMenuDeDespesa,
   formatarBRL,
   parseValorDigitado,
   uuidv7,
@@ -138,6 +139,17 @@ export function DespesaFormDialog({
   });
 
   const agrupadas = useMemo(() => agruparCategorias(categorias.data ?? []), [categorias.data]);
+  // Encerrada em mes anterior sai do menu, menos a que a despesa ja tem: sem
+  // ela na lista, o select ficaria em branco e a edicao perderia o vinculo.
+  const viagensDoMenu = useMemo(
+    () =>
+      (viagens.data ?? []).filter(
+        (v) =>
+          v.id === despesa?.viagem_id ||
+          entraNoMenuDeDespesa({ status: v.status, inicioEm: v.inicio_em, fimEm: v.fim_em }),
+      ),
+    [viagens.data, despesa?.viagem_id],
+  );
   const valorDigitado = form.watch('valor');
   const previa = parseValorDigitado(valorDigitado ?? '');
 
@@ -147,7 +159,7 @@ export function DespesaFormDialog({
         <DialogHeader>
           <DialogTitle>{despesa ? 'Editar despesa' : 'Nova despesa'}</DialogTitle>
           <DialogDescription>
-            Deixe a viagem em branco para registrar um gasto fora de frete.
+            Deixe Viagem/Frete em branco para registrar um gasto fora de frete.
           </DialogDescription>
         </DialogHeader>
 
@@ -253,7 +265,7 @@ export function DespesaFormDialog({
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Campo rotulo="Viagem" dica="Em branco = gasto fora de frete">
+            <Campo rotulo="Viagem/Frete" dica="As encerradas em meses anteriores não aparecem">
               <Controller
                 control={form.control}
                 name="viagemId"
@@ -264,7 +276,7 @@ export function DespesaFormDialog({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value={SEM_VINCULO}>Sem viagem</SelectItem>
-                      {(viagens.data ?? []).map((v) => (
+                      {viagensDoMenu.map((v) => (
                         <SelectItem key={v.id} value={v.id}>
                           {descreverViagem(v)}
                         </SelectItem>

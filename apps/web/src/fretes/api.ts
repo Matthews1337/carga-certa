@@ -1,5 +1,6 @@
 import {
   parseNumericOu0,
+  uuidv7,
   type FormaPagamento,
   type StatusFrete,
   type TipoReceita,
@@ -9,6 +10,7 @@ import type { RegistroFrete } from '@/fretes/esquema';
 import { supabase } from '@/lib/supabase';
 import {
   COLUNAS_VIAGEM,
+  concluirViagem,
   gravarPeloPush,
   normalizarViagem,
   ultimasPosicoes,
@@ -124,6 +126,18 @@ export function salvarFrete(frete: RegistroFrete, viagem: RegistroViagem): Promi
   );
 }
 
+/**
+ * "Frete concluido", o botao do detalhe: frete e viagem concluidos sem abrir o
+ * formulario. Sao dois updates (ver concluirViagem), a viagem primeiro: se o
+ * do frete falhar, o card continua aberto e o botao continua la para tentar
+ * de novo - o contrario deixaria a viagem aberta sem botao para fecha-la.
+ */
+export async function concluirFrete(frete: Pick<FreteDaLista, 'id' | 'viagem'>): Promise<void> {
+  if (frete.viagem) await concluirViagem(frete.viagem);
+  const { error } = await supabase.from('frete').update({ status: 'CONCLUIDO' }).eq('id', frete.id);
+  if (error) throw new Error(error.message);
+}
+
 // --------------------------------------------------------- recebimentos ---
 
 export interface DadosRecebimento {
@@ -138,6 +152,43 @@ export interface DadosRecebimento {
 
 export async function salvarRecebimento(dados: DadosRecebimento): Promise<void> {
   const { error } = await supabase.from('receita').upsert(dados, { onConflict: 'id' });
+  if (error) throw new Error(error.message);
+}
+
+/**
+ * "Valor recebido", o botao do detalhe: o que planoDoValorRecebido mandar,
+ * caido agora. O saldo novo vai por Pix - o caso comum; outro valor ou outra
+ * forma se corrige na lista de recebimentos. Um upsert so, para nao ficar
+ * metade confirmada.
+ */
+export async function receberOQueFalta(
+  freteId: string,
+  plano: { confirmar: Recebimento[]; saldoNovo: number },
+): Promise<void> {
+  const agora = new Date().toISOString();
+  const linhas: DadosRecebimento[] = plano.confirmar.map((r) => ({
+    id: r.id,
+    frete_id: freteId,
+    tipo: r.tipo,
+    valor: r.valor,
+    forma_recebimento: r.forma_recebimento,
+    recebido_em: agora,
+    observacao: r.observacao,
+  }));
+  if (plano.saldoNovo > 0) {
+    linhas.push({
+      id: uuidv7(),
+      frete_id: freteId,
+      tipo: 'SALDO',
+      valor: plano.saldoNovo,
+      forma_recebimento: 'PIX',
+      recebido_em: agora,
+      observacao: null,
+    });
+  }
+  if (linhas.length === 0) return;
+
+  const { error } = await supabase.from('receita').upsert(linhas, { onConflict: 'id' });
   if (error) throw new Error(error.message);
 }
 

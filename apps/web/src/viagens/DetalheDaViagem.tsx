@@ -6,9 +6,11 @@ import {
   type Ponto,
 } from '@carga-certa/shared';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin } from 'lucide-react';
+import { MapPin, Pencil } from 'lucide-react';
 import { useMemo, type ReactNode } from 'react';
 
+import { Button } from '@/components/ui/button';
+import { DialogFooter } from '@/components/ui/dialog';
 import { Carregando, ErroConsulta } from '@/components/ui/feedback';
 import { cn } from '@/lib/utils';
 import { chavesVeiculos, listarVeiculos } from '@/veiculos/api';
@@ -23,7 +25,7 @@ import { MapaViagem } from '@/viagens/MapaViagem';
 
 /**
  * Partes do detalhe iguais no frete e na viagem: o mapa com a ultima posicao do
- * celular, as despesas da viagem e os quadros de numeros.
+ * celular, as despesas da viagem, os quadros de numeros e o rodape.
  */
 
 /** Despesas da viagem e o total, sem as canceladas (mesmo corte do Painel). */
@@ -109,7 +111,7 @@ export function ListaDeDespesas({
         <ErroConsulta erro={consulta.error} />
       ) : consulta.data.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Nenhuma despesa ligada a esta viagem. Lance em Despesas, escolhendo a viagem.
+          Nenhuma despesa ligada a esta viagem. Lance em Despesas, escolhendo-a em Viagem/Frete.
         </p>
       ) : (
         <ul className="max-h-56 divide-y divide-border overflow-y-auto rounded-lg border border-border text-sm">
@@ -144,6 +146,41 @@ export function Numero({ rotulo, dica, children }: { rotulo: string; dica?: stri
           <span className="mt-0.5 block truncate text-xs font-normal text-muted-foreground">{dica}</span>
         ) : null}
       </dd>
+    </div>
+  );
+}
+
+/**
+ * Rodape do detalhe (pedido do usuario em 2026-10-15): Editar no canto
+ * esquerdo e, a direita, as acoes de um clique - abrir o card e clicar, dois
+ * cliques no total. Quem fecha e o X do topo.
+ */
+export function RodapeDoDetalhe({
+  rotuloEditar,
+  aoEditar,
+  erro,
+  children,
+}: {
+  rotuloEditar: string;
+  aoEditar: () => void;
+  /** Da acao que falhou. */
+  erro: Error | null;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      {erro ? (
+        <p role="alert" className="text-sm font-medium text-destructive sm:text-right">
+          {erro.message}
+        </p>
+      ) : null}
+      <DialogFooter className="sm:justify-between">
+        <Button variant="ghost" onClick={aoEditar}>
+          <Pencil className="size-4" aria-hidden />
+          {rotuloEditar}
+        </Button>
+        <div className="flex flex-col-reverse gap-2 sm:flex-row">{children}</div>
+      </DialogFooter>
     </div>
   );
 }

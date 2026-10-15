@@ -1,5 +1,6 @@
 import { ROTULOS, formatarBRL, formatarKm } from '@carga-certa/shared';
-import { Pencil } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Check, CircleCheck } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,23 +8,26 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import type { ViagemDaLista } from '@/viagens/api';
+import { Spinner } from '@/components/ui/feedback';
+import { chavesDespesa } from '@/despesas/api';
+import { chavesViagens, concluirViagem, type ViagemDaLista } from '@/viagens/api';
 import { kmDaViagem } from '@/viagens/apresentacao';
 import {
   ListaDeDespesas,
   MapaDoDetalhe,
   Numero,
+  RodapeDoDetalhe,
   useConjunto,
   useDespesasDaViagem,
 } from '@/viagens/DetalheDaViagem';
 
 /**
  * Detalhe da viagem sem frete: o mapa com a ultima posicao, quanto custou, os
- * km e as despesas. Igual ao detalhe do frete, sem valor nem recebimentos.
+ * km e as despesas. Igual ao detalhe do frete, sem valor nem recebimentos - e
+ * por isso o rodape so tem "Viagem concluida".
  */
 export function ViagemDetalheDialog({
   viagem,
@@ -38,24 +42,29 @@ export function ViagemDetalheDialog({
   return (
     <Dialog open={viagem !== null} onOpenChange={(v) => !v && aoFechar()}>
       <DialogContent className="sm:max-w-3xl">
-        {viagem ? <Conteudo viagem={viagem} aoFechar={aoFechar} aoEditar={aoEditar} /> : null}
+        {viagem ? <Conteudo viagem={viagem} aoEditar={aoEditar} /> : null}
       </DialogContent>
     </Dialog>
   );
 }
 
-function Conteudo({
-  viagem: v,
-  aoFechar,
-  aoEditar,
-}: {
-  viagem: ViagemDaLista;
-  aoFechar: () => void;
-  aoEditar: (viagem: ViagemDaLista) => void;
-}) {
+function Conteudo({ viagem: v, aoEditar }: { viagem: ViagemDaLista; aoEditar: (viagem: ViagemDaLista) => void }) {
+  const queryClient = useQueryClient();
   const { consulta: despesas, total } = useDespesasDaViagem(v.id);
   const conjunto = useConjunto(v);
   const { km, previsto } = kmDaViagem(v);
+
+  const concluir = useMutation({
+    mutationFn: () => concluirViagem(v),
+    // A viagem concluida conta no Painel e muda de situacao no menu da despesa.
+    onSuccess: () =>
+      Promise.all(
+        [chavesViagens.todos, ['painel'], chavesDespesa.viagens].map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey }),
+        ),
+      ),
+  });
+  const concluida = v.status === 'CONCLUIDA' || v.status === 'CANCELADA';
 
   return (
     <>
@@ -86,15 +95,18 @@ function Conteudo({
 
       <ListaDeDespesas temViagem consulta={despesas} />
 
-      <DialogFooter>
-        <Button variant="ghost" onClick={aoFechar}>
-          Fechar
+      <RodapeDoDetalhe rotuloEditar="Editar viagem" aoEditar={() => aoEditar(v)} erro={concluir.error}>
+        <Button variant="accent" disabled={concluida || concluir.isPending} onClick={() => concluir.mutate()}>
+          {concluir.isPending ? (
+            <Spinner />
+          ) : concluida ? (
+            <Check className="size-4" aria-hidden />
+          ) : (
+            <CircleCheck className="size-4" aria-hidden />
+          )}
+          Viagem concluída
         </Button>
-        <Button variant="outline" onClick={() => aoEditar(v)}>
-          <Pencil className="size-4" aria-hidden />
-          Editar viagem
-        </Button>
-      </DialogFooter>
+      </RodapeDoDetalhe>
     </>
   );
 }

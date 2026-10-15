@@ -83,7 +83,7 @@ export function ViagemFormDialog({
 
   const gravar = useMutation({
     mutationFn: (campos: CamposViagem) =>
-      salvarViagem(paraRegistroViagem(campos, rota.rota, viagem?.id ?? uuidv7(), viagem?.inicio_em)),
+      salvarViagem(paraRegistroViagem(campos, rota.rota, viagem?.id ?? uuidv7(), viagem)),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: chavesViagens.todos }),
