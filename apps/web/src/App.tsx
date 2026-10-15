@@ -10,9 +10,9 @@ import { AppShell, EmBreve } from '@/layout/AppShell';
   Cada secao de dominio vira um arquivo separado, baixado so quando a rota e
   visitada.
 
-  Existem Despesas, Painel, Fretes, Veiculos e Contratantes; falta Documentos.
-  Num arquivo unico, cada uma delas engordaria o
-  download de TODO mundo, inclusive de quem nunca abre aquela tela.
+  Existem Despesas, Painel, Fretes, Viagens, Veiculos e Contratantes; falta
+  Documentos. Num arquivo unico, cada uma delas engordaria o download de TODO
+  mundo, inclusive de quem nunca abre aquela tela.
 
   LoginPage fica fora de proposito: e a primeira tela de quem nao tem sessao,
   e adiar o carregamento dela so acrescentaria uma espera antes do login.
@@ -31,6 +31,9 @@ const ContratantesPage = lazy(() =>
 );
 const FretesPage = lazy(() =>
   import('@/fretes/FretesPage').then((m) => ({ default: m.FretesPage })),
+);
+const ViagensPage = lazy(() =>
+  import('@/viagens/ViagensPage').then((m) => ({ default: m.ViagensPage })),
 );
 
 export function App() {
@@ -60,10 +63,14 @@ export function App() {
               </Suspense>
             }
           />
-          {/* Viagens saiu do web (2026-09-28): a viagem aparece dentro do card
-              do frete, e viagem sem frete e coisa do celular. Quem tinha o
-              endereco salvo cai nos fretes. */}
-          <Route path="/viagens" element={<Navigate to="/fretes" replace />} />
+          <Route
+            path="/viagens"
+            element={
+              <Suspense fallback={<Carregando />}>
+                <ViagensPage />
+              </Suspense>
+            }
+          />
           <Route
             path="/fretes"
             element={

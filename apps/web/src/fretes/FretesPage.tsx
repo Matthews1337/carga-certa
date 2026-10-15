@@ -1,24 +1,18 @@
-import {
-  ROTULOS,
-  decodificarPolyline,
-  formatarKm,
-  resumirRecebimento,
-  type Ponto,
-} from '@carga-certa/shared';
+import { ROTULOS, formatarKm, resumirRecebimento } from '@carga-certa/shared';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, Plus } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Carregando, ErroConsulta, Vazio } from '@/components/ui/feedback';
-import { cidadeDoLugar, kmDoFrete, mesDoInicio } from '@/fretes/apresentacao';
 import { chavesFretes, listarFretes, type FreteDaLista } from '@/fretes/api';
 import { FreteDetalheDialog } from '@/fretes/FreteDetalheDialog';
 import { FreteFormDialog } from '@/fretes/FreteFormDialog';
-import { MiniMapa } from '@/fretes/MiniMapa';
 import { ValorDoFrete } from '@/fretes/ValorDoFrete';
 import { cn } from '@/lib/utils';
+import { cidadeDoLugar, kmDaViagem, mesDoInicio } from '@/viagens/apresentacao';
+import { MiniMapaDaViagem } from '@/viagens/MiniMapa';
 
 export function FretesPage() {
   const [detalhe, setDetalhe] = useState<string | null>(null);
@@ -97,29 +91,12 @@ function CartaoFrete({ frete, aoAbrir }: { frete: FreteDaLista; aoAbrir: () => v
   const v = frete.viagem;
   const origem = cidadeDoLugar(v?.origem_nome);
   const destino = cidadeDoLugar(v?.destino_nome);
-  const { km, previsto } = kmDoFrete(v);
+  const { km, previsto } = kmDaViagem(v);
   const { situacao } = resumirRecebimento({
     statusFrete: frete.status,
     valorCombinado: frete.valor_total,
     recebimentos: frete.recebimentos.map((r) => ({ tipo: r.tipo, valor: r.valor, recebidoEm: r.recebido_em })),
   });
-
-  const pontos = useMemo(() => {
-    const ponto = (lat: number | null | undefined, lng: number | null | undefined): Ponto | null =>
-      lat !== null && lat !== undefined && lng !== null && lng !== undefined ? [lat, lng] : null;
-    let rota: Ponto[] | null = null;
-    try {
-      rota = v?.rota_polyline ? decodificarPolyline(v.rota_polyline) : null;
-    } catch {
-      // Rota corrompida: o card mostra a reta entre os pinos, e nao quebra.
-    }
-    return {
-      origem: ponto(v?.origem_lat, v?.origem_lng),
-      destino: ponto(v?.destino_lat, v?.destino_lng),
-      rota,
-      posicao: frete.posicao ? ([frete.posicao.latitude, frete.posicao.longitude] as Ponto) : null,
-    };
-  }, [v, frete.posicao]);
 
   // O botao e o titulo, esticado sobre o card inteiro (after:inset-0): o clique
   // vale em qualquer lugar, e o leitor de tela anuncia "Rio Verde, GO ate
@@ -158,11 +135,9 @@ function CartaoFrete({ frete, aoAbrir }: { frete: FreteDaLista; aoAbrir: () => v
         </div>
       </div>
 
-      <MiniMapa
-        origem={pontos.origem}
-        destino={pontos.destino}
-        rota={pontos.rota}
-        posicao={pontos.posicao}
+      <MiniMapaDaViagem
+        viagem={v}
+        posicao={frete.posicao}
         rotulo={`Rota de ${origem} até ${destino}${frete.posicao ? ', com a última posição do motorista' : ''}`}
       />
 

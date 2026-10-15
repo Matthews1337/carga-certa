@@ -1,13 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  SEM_VINCULO,
-  diaLocal,
-  esquemaFrete,
-  meioDiaLocal,
-  paraRegistros,
-  type CamposFrete,
-} from '../esquema';
+import { SEM_VINCULO, diaLocal, meioDiaLocal } from '@/viagens/esquema';
+
+import { esquemaFrete, paraRegistros, type CamposFrete } from '../esquema';
 
 const base: CamposFrete = {
   origem: { nome: 'Rio Verde, GO', lat: -17.7977812, lng: -50.9280634 },

@@ -8,6 +8,7 @@ import {
   Receipt,
   Route,
   Truck,
+  Wallet,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -24,13 +25,15 @@ import { BotaoTema } from '@/tema/BotaoTema';
  * As secoes que ainda nao existem levam para a tela "em breve" em vez de
  * sumirem do menu: o mapa completo do produto fica visivel desde o comeco.
  *
- * Viagens nao esta aqui de proposito (2026-09-28): no web, a viagem aparece
- * dentro do card do frete, e viagem sem frete e registrada pelo celular.
+ * Fretes e Viagens: o card do frete ja traz a viagem dele; Viagens lista as
+ * viagens SEM frete (deslocamento vazio, retorno, oficina). Saiu do menu em
+ * 2026-09-28 e voltou em 2026-10-15, a pedido do usuario.
  */
 const SECOES = [
   { para: '/painel', rotulo: 'Painel', icone: LayoutDashboard },
   { para: '/despesas', rotulo: 'Despesas', icone: Receipt },
-  { para: '/fretes', rotulo: 'Fretes', icone: Route },
+  { para: '/fretes', rotulo: 'Fretes', icone: Wallet },
+  { para: '/viagens', rotulo: 'Viagens', icone: Route },
   { para: '/veiculos', rotulo: 'Veículos', icone: Truck },
   { para: '/contratantes', rotulo: 'Contratantes', icone: Building2 },
   { para: '/documentos', rotulo: 'Documentos', icone: FileText },

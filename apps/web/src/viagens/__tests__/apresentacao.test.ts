@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { cidadeDoLugar, kmDoFrete, mesDoInicio, tempoDesde } from '../apresentacao';
+import { cidadeDoLugar, kmDaViagem, mesDoInicio, tempoDesde } from '../apresentacao';
 
 describe('cidadeDoLugar', () => {
   it('endereco inteiro vira cidade e UF', () => {
@@ -34,17 +34,17 @@ describe('mesDoInicio', () => {
   });
 });
 
-describe('kmDoFrete', () => {
+describe('kmDaViagem', () => {
   it('odometro manda quando existe', () => {
-    expect(kmDoFrete({ km_total: 1012, km_previsto: 997.5 })).toEqual({ km: 1012, previsto: false });
+    expect(kmDaViagem({ km_total: 1012, km_previsto: 997.5 })).toEqual({ km: 1012, previsto: false });
   });
 
   it('antes do fim da viagem, o previsto da rota', () => {
-    expect(kmDoFrete({ km_total: null, km_previsto: 997.5 })).toEqual({ km: 997.5, previsto: true });
+    expect(kmDaViagem({ km_total: null, km_previsto: 997.5 })).toEqual({ km: 997.5, previsto: true });
   });
 
   it('sem viagem nem rota', () => {
-    expect(kmDoFrete(null)).toEqual({ km: null, previsto: true });
+    expect(kmDaViagem(null)).toEqual({ km: null, previsto: true });
   });
 });
 

@@ -1,6 +1,6 @@
 import { decodificarPolyline, type Ponto } from '@carga-certa/shared';
 
-import malha from '@/fretes/malha-ufs.json';
+import malha from '@/viagens/malha-ufs.json';
 
 /**
  * Projecao e fundo do mapa minimalista (SVG) dos cards.

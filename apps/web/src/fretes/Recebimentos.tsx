@@ -34,7 +34,7 @@ import {
   type FreteDaLista,
   type Recebimento,
 } from '@/fretes/api';
-import { diaLocal, meioDiaLocal } from '@/fretes/esquema';
+import { diaLocal, meioDiaLocal } from '@/viagens/esquema';
 
 /**
  * Recebimentos do frete: adiantamento, saldo, estadia... So se lancam aqui,

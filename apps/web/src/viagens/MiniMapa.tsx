@@ -1,9 +1,10 @@
-import { dividirRota, type Ponto } from '@carga-certa/shared';
+import { decodificarPolyline, dividirRota, type Ponto } from '@carga-certa/shared';
 import { useMemo } from 'react';
 
-import { contornosDasUfs, caminho, enquadrar, projetar, seCruzam } from '@/fretes/projecao';
 import { CORES_DO_MAPA } from '@/lib/mapa';
 import { cn } from '@/lib/utils';
+import type { PosicaoAtual, ViagemNaTela } from '@/viagens/api';
+import { contornosDasUfs, caminho, enquadrar, projetar, seCruzam } from '@/viagens/projecao';
 
 /**
  * O mapa minimalista do card: contorno dos estados, a rota, pino verde no
@@ -18,6 +19,44 @@ import { cn } from '@/lib/utils';
 
 /** Largura / altura do desenho. O container precisa ter a mesma proporcao. */
 export const PROPORCAO_MINIMAPA = 2;
+
+/** O mini-mapa de uma viagem como vem do banco: le pontos, rota e posicao. */
+export function MiniMapaDaViagem({
+  viagem: v,
+  posicao,
+  rotulo,
+}: {
+  viagem: ViagemNaTela | null;
+  posicao: PosicaoAtual | null;
+  rotulo: string;
+}) {
+  const pontos = useMemo(() => {
+    const ponto = (lat: number | null | undefined, lng: number | null | undefined): Ponto | null =>
+      lat !== null && lat !== undefined && lng !== null && lng !== undefined ? [lat, lng] : null;
+    let rota: Ponto[] | null = null;
+    try {
+      rota = v?.rota_polyline ? decodificarPolyline(v.rota_polyline) : null;
+    } catch {
+      // Rota corrompida: o card mostra a reta entre os pinos, e nao quebra.
+    }
+    return {
+      origem: ponto(v?.origem_lat, v?.origem_lng),
+      destino: ponto(v?.destino_lat, v?.destino_lng),
+      rota,
+      posicao: posicao ? ([posicao.latitude, posicao.longitude] as Ponto) : null,
+    };
+  }, [v, posicao]);
+
+  return (
+    <MiniMapa
+      origem={pontos.origem}
+      destino={pontos.destino}
+      rota={pontos.rota}
+      posicao={pontos.posicao}
+      rotulo={rotulo}
+    />
+  );
+}
 
 export function MiniMapa({
   origem,

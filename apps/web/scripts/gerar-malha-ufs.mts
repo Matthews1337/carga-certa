@@ -26,7 +26,7 @@ const URL_IBGE =
   '?intrarregiao=UF&qualidade=minima&formato=application/vnd.geo%2Bjson';
 const TOLERANCIA_GRAUS = 0.02;
 const PRECISAO = 3;
-const DESTINO = fileURLToPath(new URL('../src/fretes/malha-ufs.json', import.meta.url));
+const DESTINO = fileURLToPath(new URL('../src/viagens/malha-ufs.json', import.meta.url));
 
 type Anel = [number, number][];
 interface Feature {

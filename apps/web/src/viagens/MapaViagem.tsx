@@ -9,11 +9,11 @@ import { cn } from '@/lib/utils';
 import { useTema } from '@/tema/TemaProvider';
 
 /**
- * Mapa de verdade (MapLibre + OpenFreeMap), para o detalhe e o formulario do
- * frete. Um por vez na tela - os cards usam o MiniMapa em SVG.
+ * Mapa de verdade (MapLibre + OpenFreeMap), para o detalhe e o formulario de
+ * frete e de viagem. Um por vez na tela - os cards usam o MiniMapa em SVG.
  *
- * O MapLibre (~800 kB) e importado na hora em que o mapa monta: quem so olha a
- * lista de fretes nao baixa. O pedaco e separado no vite.config.ts.
+ * O MapLibre (~1 MB) e importado na hora em que o mapa monta: quem so olha a
+ * lista nao baixa. O pedaco e separado no vite.config.ts.
  */
 
 type Qual = 'origem' | 'destino';
@@ -31,11 +31,11 @@ const TEXTOS_DO_MAPA = {
 };
 
 const NOME_DO_PINO: Record<Qual, string> = {
-  origem: 'Início do frete',
-  destino: 'Fim do frete',
+  origem: 'Início',
+  destino: 'Fim',
 };
 
-export function MapaFrete({
+export function MapaViagem({
   origem,
   destino,
   rota,
@@ -150,7 +150,7 @@ export function MapaFrete({
         posicao,
       });
     } catch (e) {
-      console.error('MapaFrete:', e);
+      console.error('MapaViagem:', e);
       setErro('Não foi possível desenhar a rota no mapa.');
     }
   }, [pronto, origem, destino, rota, posicao]);

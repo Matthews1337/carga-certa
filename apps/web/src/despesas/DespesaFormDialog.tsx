@@ -47,7 +47,7 @@ import {
   subirComprovante,
   type DespesaDaLista,
 } from '@/despesas/api';
-import { cidadeDoLugar } from '@/fretes/apresentacao';
+import { cidadeDoLugar } from '@/viagens/apresentacao';
 
 const SEM_VINCULO = 'nenhum';
 

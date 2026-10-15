@@ -4,8 +4,7 @@ import { useEffect, useId, useState } from 'react';
 
 import { Spinner } from '@/components/ui/feedback';
 import { Input } from '@/components/ui/input';
-import type { LugarDoFrete } from '@/fretes/esquema';
-import { buscarLugares, type Coordenada } from '@/lib/rotas';
+import { buscarLugares, type Coordenada, type Lugar } from '@/lib/rotas';
 import { cn } from '@/lib/utils';
 
 /**
@@ -27,8 +26,8 @@ export function BuscaLugar({
   erro,
 }: {
   rotulo: string;
-  valor: LugarDoFrete | null;
-  aoEscolher: (lugar: LugarDoFrete | null) => void;
+  valor: Lugar | null;
+  aoEscolher: (lugar: Lugar | null) => void;
   /** Centro do mapa: puxa para cima o que esta perto dali. */
   perto?: Coordenada;
   /** Cor do pino correspondente no mapa. */
@@ -68,7 +67,7 @@ export function BuscaLugar({
   });
   const lugares = busca.data ?? [];
 
-  const escolher = (lugar: LugarDoFrete) => {
+  const escolher = (lugar: Lugar) => {
     aoEscolher(lugar);
     setTexto(lugar.nome);
     setAberto(false);

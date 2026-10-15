@@ -31,7 +31,7 @@ export function mesDoInicio(iso: string | null | undefined): string {
  * Km do card: o dos odometros quando a viagem terminou; antes disso, o da rota
  * calculada, marcado como previsto.
  */
-export function kmDoFrete(viagem: { km_total: number | null; km_previsto: number | null } | null): {
+export function kmDaViagem(viagem: { km_total: number | null; km_previsto: number | null } | null): {
   km: number | null;
   previsto: boolean;
 } {
