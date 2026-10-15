@@ -23,6 +23,12 @@ import { deCentavos, paraCentavos, parseNumeric, somar } from './numeric';
  *   viagem  -> data de inicio. Uma viagem de 28/09 a 03/10 conta inteira em
  *              setembro: dividir os km entre meses exigiria o odometro dia a
  *              dia, que o app nao registra.
+ *
+ * Km de cada viagem: o do odometro (final - inicial) quando existe. Sem ele, a
+ * distancia da rota calculada (km previsto) - mas so na viagem CONCLUIDA: a
+ * planejada ou em andamento ainda nao rodou a rota inteira, e uma viagem
+ * marcada para o fim do mes nao pode contar como rodada. O previsto e
+ * estimativa e sai separado, para a tela poder dizer isso.
  */
 export const CAMPO_DO_MES = {
   despesa: 'data_hora',
@@ -49,6 +55,8 @@ export interface ViagemParaResumo {
   inicioEm: Instante;
   /** Coluna gerada no banco (odometro final - inicial). Nulo sem odometro final. */
   kmTotal: number | string | null | undefined;
+  /** Distancia da rota calculada. Usada so na viagem concluida sem odometro. */
+  kmPrevisto?: number | string | null | undefined;
 }
 
 export interface ResumoMensal {
@@ -63,10 +71,15 @@ export interface ResumoMensal {
     emAberto: number;
   };
   km: {
+    /** odometro + previsto. */
     total: number;
-    /** Viagens que entraram na soma de km. */
-    viagensComKm: number;
-    /** Viagens do mes ainda sem odometro final, e por isso fora da soma. */
+    /** Medido pelo odometro. */
+    odometro: number;
+    /** Estimado pela rota, nas viagens concluidas sem odometro. */
+    previsto: number;
+    viagensComOdometro: number;
+    viagensComPrevisto: number;
+    /** Fora da soma: sem odometro e ainda nao concluidas (ou concluidas sem rota). */
     viagensSemKm: number;
   };
 }
@@ -108,8 +121,21 @@ export function resumirMes({
   const entrou = somar(receitas.filter((r) => noMes(r.recebidoEm)).map((r) => r.valor));
 
   const doMes = viagens.filter((v) => noMes(v.inicioEm) && v.status !== 'CANCELADA');
-  const kms = doMes.map((v) => parseNumeric(v.kmTotal));
-  const conhecidos = kms.filter((k): k is number => k !== null);
+  let odometro = 0;
+  let previsto = 0;
+  let viagensComOdometro = 0;
+  let viagensComPrevisto = 0;
+  for (const v of doMes) {
+    const medido = parseNumeric(v.kmTotal);
+    const estimado = v.status === 'CONCLUIDA' ? parseNumeric(v.kmPrevisto) : null;
+    if (medido !== null) {
+      odometro += medido;
+      viagensComOdometro += 1;
+    } else if (estimado !== null) {
+      previsto += estimado;
+      viagensComPrevisto += 1;
+    }
+  }
 
   return {
     entrou,
@@ -122,9 +148,12 @@ export function resumirMes({
       emAberto: doMes.filter((v) => VIAGEM_ABERTA.includes(v.status)).length,
     },
     km: {
-      total: conhecidos.reduce((a, b) => a + b, 0),
-      viagensComKm: conhecidos.length,
-      viagensSemKm: kms.length - conhecidos.length,
+      total: odometro + previsto,
+      odometro,
+      previsto,
+      viagensComOdometro,
+      viagensComPrevisto,
+      viagensSemKm: doMes.length - viagensComOdometro - viagensComPrevisto,
     },
   };
 }

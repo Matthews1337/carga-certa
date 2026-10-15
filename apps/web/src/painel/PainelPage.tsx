@@ -111,7 +111,8 @@ export function PainelPage() {
           <CartaoIndicador
             icone={Gauge}
             titulo="Km rodados"
-            valor={formatarKm(resumo.data.km.total)}
+            // "≈" quando parte da soma e estimada pela rota, e nao medida.
+            valor={`${resumo.data.km.previsto > 0 ? '≈ ' : ''}${formatarKm(resumo.data.km.total)}`}
             detalhe={detalheKm(resumo.data)}
             alerta={resumo.data.km.viagensSemKm > 0}
           />
@@ -120,7 +121,8 @@ export function PainelPage() {
 
       <p className="text-xs text-muted-foreground">
         Receitas contam pela data em que o dinheiro caiu; despesas, pela data do gasto, sem as
-        canceladas. Viagens e km contam pela data de início da viagem.
+        canceladas. Viagens e km contam pela data de início da viagem. Os km vêm do odômetro; sem
+        ele, da rota prevista das viagens concluídas.
       </p>
     </div>
   );
@@ -210,10 +212,13 @@ function detalheViagens({ viagens }: ResumoMensal): string {
 
 function detalheKm({ viagens, km }: ResumoMensal): string {
   if (viagens.total === 0) return 'Nenhuma viagem iniciada neste mês.';
-  // A soma ignora quem ainda nao tem odometro final. Dizer quantas ficaram de
-  // fora evita que o motorista leia um total menor como erro de conta.
-  if (km.viagensSemKm > 0) {
-    return `${plural(km.viagensSemKm, 'viagem', 'viagens')} sem odômetro final, fora da soma`;
-  }
-  return `em ${plural(km.viagensComKm, 'viagem', 'viagens')}`;
+  // Diz de onde veio cada parte da soma: o motorista precisa saber o que foi
+  // medido e o que e estimativa da rota.
+  const partes: string[] = [];
+  if (km.viagensComOdometro > 0) partes.push(`${formatarKm(km.odometro)} pelo odômetro`);
+  if (km.viagensComPrevisto > 0) partes.push(`${formatarKm(km.previsto)} estimados pela rota`);
+  // A soma ignora quem ainda nao tem km. Dizer quantas ficaram de fora evita
+  // que o motorista leia um total menor como erro de conta.
+  if (km.viagensSemKm > 0) partes.push(`${plural(km.viagensSemKm, 'viagem', 'viagens')} ainda sem km`);
+  return partes.join(' · ');
 }

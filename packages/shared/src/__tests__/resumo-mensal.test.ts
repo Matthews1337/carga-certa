@@ -92,9 +92,44 @@ describe('resumirMes: viagens e km', () => {
     expect(r.viagens).toEqual({ total: 3, concluidas: 1, emAberto: 2 });
   });
 
-  it('soma os km conhecidos e diz quantas viagens ficaram de fora da soma', () => {
+  it('soma os km do odometro e diz quantas viagens ficaram de fora da soma', () => {
     const r = resumirMes({ ...vazio, mes: '2026-09', viagens });
-    expect(r.km).toEqual({ total: 4150, viagensComKm: 2, viagensSemKm: 1 });
+    expect(r.km).toEqual({
+      total: 4150,
+      odometro: 4150,
+      previsto: 0,
+      viagensComOdometro: 2,
+      viagensComPrevisto: 0,
+      viagensSemKm: 1,
+    });
+  });
+
+  describe('km previstos da rota, quando falta odometro', () => {
+    const comRota: ViagemParaResumo[] = [
+      { status: 'CONCLUIDA', inicioEm: set(2), kmTotal: 1800, kmPrevisto: 1750 }, // odometro manda
+      { status: 'CONCLUIDA', inicioEm: set(10), kmTotal: null, kmPrevisto: '993.5' }, // estimado
+      { status: 'EM_ANDAMENTO', inicioEm: set(17), kmTotal: null, kmPrevisto: 336.4 }, // ainda rodando
+      { status: 'PLANEJADA', inicioEm: set(28), kmTotal: null, kmPrevisto: 500 }, // nao rodou
+      { status: 'CONCLUIDA', inicioEm: set(29), kmTotal: null, kmPrevisto: null }, // sem rota
+    ];
+
+    it('usa a rota so na viagem concluida sem odometro, e separa o estimado', () => {
+      const r = resumirMes({ ...vazio, mes: '2026-09', viagens: comRota });
+      expect(r.km).toEqual({
+        total: 2793.5,
+        odometro: 1800,
+        previsto: 993.5,
+        viagensComOdometro: 1,
+        viagensComPrevisto: 1,
+        viagensSemKm: 3,
+      });
+    });
+
+    it('com odometro, ignora o previsto mesmo sendo maior ou menor', () => {
+      const r = resumirMes({ ...vazio, mes: '2026-09', viagens: [comRota[0] as ViagemParaResumo] });
+      expect(r.km.total).toBe(1800);
+      expect(r.km.previsto).toBe(0);
+    });
   });
 
   it('a viagem cancelada nao soma km, mesmo tendo odometro', () => {
@@ -110,7 +145,14 @@ describe('resumirMes: mes vazio', () => {
       saiu: 0,
       saldo: 0,
       viagens: { total: 0, concluidas: 0, emAberto: 0 },
-      km: { total: 0, viagensComKm: 0, viagensSemKm: 0 },
+      km: {
+        total: 0,
+        odometro: 0,
+        previsto: 0,
+        viagensComOdometro: 0,
+        viagensComPrevisto: 0,
+        viagensSemKm: 0,
+      },
     });
   });
 });

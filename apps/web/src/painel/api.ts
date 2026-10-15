@@ -39,7 +39,7 @@ export async function carregarResumoDoMes(mes: string): Promise<ResumoMensal> {
 
     supabase
       .from('viagem')
-      .select('status, inicio_em, km_total')
+      .select('status, inicio_em, km_total, km_previsto')
       .is('deleted_at', null)
       .neq('status', 'CANCELADA')
       .gte(CAMPO_DO_MES.viagem, de)
@@ -65,6 +65,7 @@ export async function carregarResumoDoMes(mes: string): Promise<ResumoMensal> {
       status: v.status,
       inicioEm: v[CAMPO_DO_MES.viagem],
       kmTotal: v.km_total,
+      kmPrevisto: v.km_previsto,
     })),
   });
 }
