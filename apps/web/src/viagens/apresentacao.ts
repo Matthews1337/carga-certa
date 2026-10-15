@@ -51,3 +51,14 @@ export function tempoDesde(iso: string, agora: Date = new Date()): string {
   const dias = Math.round(horas / 24);
   return dias === 1 ? 'há 1 dia' : `há ${dias} dias`;
 }
+
+/**
+ * O que acontece com as despesas ao apagar a viagem (ou o frete), na
+ * confirmacao. `n` indefinido = ainda carregando; zero = nada a dizer.
+ */
+export function fraseDasDespesas(n: number | undefined): string | null {
+  if (n === 0) return null;
+  if (n === undefined) return 'As despesas da viagem continuam em Despesas, sem viagem.';
+  if (n === 1) return 'A despesa da viagem continua em Despesas, sem viagem.';
+  return `As ${n} despesas da viagem continuam em Despesas, sem viagem.`;
+}

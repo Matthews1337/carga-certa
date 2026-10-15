@@ -1,5 +1,6 @@
 import {
   fimDaViagem,
+  formatarBRL,
   parseNumeric,
   parseNumericOu0,
   somar,
@@ -188,6 +189,92 @@ export async function concluirViagem(v: Pick<ViagemNaTela, 'id' | 'inicio_em' | 
     .update({ status: 'CONCLUIDA', fim_em: fimDaViagem('CONCLUIDA', v.inicio_em, v.fim_em) })
     .eq('id', v.id);
   if (error) throw new Error(error.message);
+}
+
+// ---------------------------------------------------------------- exclusao ---
+
+/**
+ * Apaga viagens (exclusao logica) com o que o banco faria numa exclusao fisica:
+ *  - paradas e fechamento vao junto (on delete cascade);
+ *  - as despesas ficam, sem viagem (on delete set null): o dinheiro foi gasto,
+ *    e a despesa continua em Despesas e no Painel.
+ * `junto` leva o que mais sai na mesma transacao - no frete, o proprio frete,
+ * os recebimentos e as cargas.
+ *
+ * As despesas sao desligadas antes, num update a parte (o push e upsert, e
+ * exigiria a despesa inteira). Se a exclusao falhar depois, o card continua la
+ * e apagar de novo termina o servico; na ordem inversa, sobrariam despesas
+ * presas a uma viagem apagada, que o banco nao deixaria editar.
+ * As posicoes do celular ficam: a view da ultima posicao ja ignora viagem
+ * apagada, e elas nao descem no pull.
+ */
+export async function apagarComAsViagens(
+  viagemIds: string[],
+  junto: Record<string, string[]>,
+  seRecusarDono: string,
+): Promise<void> {
+  const [paradas, fechamentos] = await Promise.all([
+    idsAtivos('parada', 'viagem_id', viagemIds),
+    idsAtivos('fechamento_viagem', 'viagem_id', viagemIds),
+  ]);
+
+  if (viagemIds.length > 0) {
+    const { error } = await supabase
+      .from('despesa')
+      .update({ viagem_id: null })
+      .in('viagem_id', viagemIds)
+      .is('deleted_at', null);
+    if (error) {
+      if (error.code === '42501') throw new Error(await despesasPresas(viagemIds));
+      throw new Error(error.message);
+    }
+  }
+
+  const deleted = { ...junto, viagem: viagemIds, parada: paradas, fechamento_viagem: fechamentos };
+  const payload = Object.fromEntries(
+    Object.entries(deleted)
+      .filter(([, ids]) => ids.length > 0)
+      .map(([tabela, ids]) => [tabela, { created: [], updated: [], deleted: ids }]),
+  );
+  const { error } = await supabase.rpc('push_changes', { changes: payload as Json });
+  if (error) throw new Error(error.code === '42501' ? seRecusarDono : error.message);
+}
+
+export function apagarViagem(viagemId: string): Promise<void> {
+  return apagarComAsViagens([viagemId], {}, 'Esta viagem não pôde ser apagada. Recarregue a página.');
+}
+
+/** Ids nao apagados de `tabela` cujo `coluna` esta em `ids`. */
+export async function idsAtivos(
+  tabela: 'parada' | 'fechamento_viagem' | 'receita' | 'carga',
+  coluna: 'viagem_id' | 'frete_id',
+  ids: string[],
+): Promise<string[]> {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase.from(tabela).select('id').in(coluna, ids).is('deleted_at', null);
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((l: { id: string }) => l.id);
+}
+
+/**
+ * O banco (valida_parente) recusa mexer na despesa de um veiculo ja excluido,
+ * mesmo so para tira-la da viagem. A mensagem diz qual e o que fazer.
+ */
+async function despesasPresas(viagemIds: string[]): Promise<string> {
+  const { data } = await supabase
+    .from('despesa')
+    .select('valor, data_hora, veiculo:veiculo ( deleted_at )')
+    .in('viagem_id', viagemIds)
+    .is('deleted_at', null);
+  const presas = (data ?? []).filter((d) => d.veiculo?.deleted_at);
+  const quais = presas
+    .map((d) => `${formatarBRL(parseNumericOu0(d.valor))} de ${new Date(d.data_hora).toLocaleDateString('pt-BR')}`)
+    .join(', ');
+  return presas.length === 1
+    ? `A despesa de ${quais} é de um veículo excluído, e o banco não deixa tirá-la da viagem. ` +
+        'Em Despesas, troque o veículo dela e tente apagar de novo.'
+    : `Algumas despesas desta viagem${quais ? ` (${quais})` : ''} são de um veículo excluído, e o banco não ` +
+        'deixa tirá-las da viagem. Em Despesas, troque o veículo delas e tente apagar de novo.';
 }
 
 // ------------------------------------------------------------- despesas ---

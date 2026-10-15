@@ -19,12 +19,15 @@ export function ConfirmarExclusao({
   aberto,
   titulo,
   descricao,
+  rotuloConfirmar = 'Excluir',
   aoConfirmar,
   aoFechar,
 }: {
   aberto: boolean;
   titulo: string;
   descricao: ReactNode;
+  /** O verbo do botao que abriu a confirmacao ("Apagar"), para nao trocar de palavra no meio. */
+  rotuloConfirmar?: string;
   aoConfirmar: () => Promise<void>;
   aoFechar: () => void;
 }) {
@@ -69,7 +72,7 @@ export function ConfirmarExclusao({
           </Button>
           <Button variant="destructive" onClick={() => void confirmar()} disabled={pendente}>
             {pendente ? <Spinner /> : null}
-            Excluir
+            {rotuloConfirmar}
           </Button>
         </DialogFooter>
       </DialogContent>

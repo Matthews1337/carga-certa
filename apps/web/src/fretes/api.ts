@@ -10,8 +10,10 @@ import type { RegistroFrete } from '@/fretes/esquema';
 import { supabase } from '@/lib/supabase';
 import {
   COLUNAS_VIAGEM,
+  apagarComAsViagens,
   concluirViagem,
   gravarPeloPush,
+  idsAtivos,
   normalizarViagem,
   ultimasPosicoes,
   type PosicaoAtual,
@@ -136,6 +138,25 @@ export async function concluirFrete(frete: Pick<FreteDaLista, 'id' | 'viagem'>):
   if (frete.viagem) await concluirViagem(frete.viagem);
   const { error } = await supabase.from('frete').update({ status: 'CONCLUIDO' }).eq('id', frete.id);
   if (error) throw new Error(error.message);
+}
+
+/**
+ * Apaga o frete com a viagem dele, os recebimentos e as cargas, numa transacao
+ * so; as despesas da viagem ficam, sem viagem. Ver apagarComAsViagens.
+ *
+ * Os recebimentos saem porque o banco os apagaria junto (on delete cascade), e
+ * porque o "Entrou" do Painel conta recebimento sem olhar o frete.
+ */
+export async function apagarFrete(frete: Pick<FreteDaLista, 'id' | 'viagem'>): Promise<void> {
+  const [receitas, cargas] = await Promise.all([
+    idsAtivos('receita', 'frete_id', [frete.id]),
+    idsAtivos('carga', 'frete_id', [frete.id]),
+  ]);
+  await apagarComAsViagens(
+    frete.viagem ? [frete.viagem.id] : [],
+    { frete: [frete.id], receita: receitas, carga: cargas },
+    'Este frete não pôde ser apagado. Recarregue a página.',
+  );
 }
 
 // --------------------------------------------------------- recebimentos ---

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ROTULOS, formatarBRL, parseValorDigitado, uuidv7, type StatusFrete } from '@carga-certa/shared';
+import { ROTULOS, formatarBRL, parseValorDigitado, somar, uuidv7, type StatusFrete } from '@carga-certa/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/select';
 import { chavesContratantes, listarContratantes } from '@/contratantes/api';
 import { chavesDespesa } from '@/despesas/api';
-import { chavesFretes, salvarFrete, type FreteDaLista } from '@/fretes/api';
+import { apagarFrete, chavesFretes, salvarFrete, type FreteDaLista } from '@/fretes/api';
 import {
   SITUACOES_FRETE,
   esquemaFrete,
@@ -34,7 +34,11 @@ import {
   type SituacaoFrete,
 } from '@/fretes/esquema';
 import { CamposDoConjunto } from '@/veiculos/CamposDoConjunto';
+import { chavesViagens } from '@/viagens/api';
+import { cidadeDoLugar, fraseDasDespesas } from '@/viagens/apresentacao';
+import { BotaoApagar } from '@/viagens/BotaoApagar';
 import { BuscasDaRota, MapaDaRota } from '@/viagens/CamposDaRota';
+import { useDespesasDaViagem } from '@/viagens/DetalheDaViagem';
 import { SEM_VINCULO, diaLocal } from '@/viagens/esquema';
 import { lugaresDa, rotaGravadaDa, useRotaDoFormulario } from '@/viagens/useRotaDoFormulario';
 
@@ -111,6 +115,21 @@ export function FreteFormDialog({
     },
     onError: (e: unknown) => setErro(e instanceof Error ? e.message : String(e)),
   });
+
+  // So para dizer na confirmacao quantas despesas ficam; o detalhe ja as buscou.
+  const despesas = useDespesasDaViagem(frete?.viagem?.id ?? null).consulta.data;
+
+  const apagar = async () => {
+    if (!frete) return;
+    await apagarFrete(frete);
+    await Promise.all(
+      // Despesas: as da viagem passam a "sem viagem" na lista e no menu.
+      [chavesFretes.todos, chavesViagens.todos, ['painel'], chavesDespesa.todas, chavesDespesa.viagens].map(
+        (queryKey) => queryClient.invalidateQueries({ queryKey }),
+      ),
+    );
+    aoFechar();
+  };
 
   const erros = form.formState.errors;
   const valorDigitado = parseValorDigitado(form.watch('valor') ?? '');
@@ -228,6 +247,14 @@ export function FreteFormDialog({
           ) : null}
 
           <DialogFooter className="lg:col-span-2">
+            {frete ? (
+              <BotaoApagar
+                rotulo="Apagar frete"
+                desabilitado={gravar.isPending}
+                aoApagar={apagar}
+                descricao={<DescricaoDaExclusao frete={frete} despesas={despesas?.length} />}
+              />
+            ) : null}
             <Button type="button" variant="ghost" onClick={aoFechar} disabled={gravar.isPending}>
               Cancelar
             </Button>
@@ -240,6 +267,22 @@ export function FreteFormDialog({
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** O que sai junto com o frete e o que fica, com os numeros. */
+function DescricaoDaExclusao({ frete, despesas }: { frete: FreteDaLista; despesas: number | undefined }) {
+  const v = frete.viagem;
+  const n = frete.recebimentos.length;
+  const total = formatarBRL(somar(frete.recebimentos.map((r) => r.valor)));
+  return (
+    <>
+      O frete {cidadeDoLugar(v?.origem_nome)} → {cidadeDoLugar(v?.destino_nome)} sai de Fretes e do Painel
+      {v ? ', com a viagem dele.' : '.'}
+      {n === 1 ? ` O recebimento lançado (${total}) sai junto.` : ''}
+      {n > 1 ? ` Os ${n} recebimentos lançados (${total}) saem junto.` : ''}
+      {v ? ` ${fraseDasDespesas(despesas) ?? ''}` : ''}
+    </>
   );
 }
 

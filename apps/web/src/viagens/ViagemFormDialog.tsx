@@ -25,8 +25,11 @@ import {
 } from '@/components/ui/select';
 import { chavesDespesa } from '@/despesas/api';
 import { CamposDoConjunto } from '@/veiculos/CamposDoConjunto';
-import { chavesViagens, salvarViagem, type ViagemDaLista } from '@/viagens/api';
+import { apagarViagem, chavesViagens, salvarViagem, type ViagemDaLista } from '@/viagens/api';
+import { cidadeDoLugar, fraseDasDespesas } from '@/viagens/apresentacao';
+import { BotaoApagar } from '@/viagens/BotaoApagar';
 import { BuscasDaRota, MapaDaRota } from '@/viagens/CamposDaRota';
+import { useDespesasDaViagem } from '@/viagens/DetalheDaViagem';
 import {
   SEM_VINCULO,
   diaLocal,
@@ -95,6 +98,21 @@ export function ViagemFormDialog({
     },
     onError: (e: unknown) => setErro(e instanceof Error ? e.message : String(e)),
   });
+
+  // So para dizer na confirmacao quantas despesas ficam; o detalhe ja as buscou.
+  const despesas = useDespesasDaViagem(viagem?.id ?? null).consulta.data;
+
+  const apagar = async () => {
+    if (!viagem) return;
+    await apagarViagem(viagem.id);
+    await Promise.all(
+      // Despesas: as da viagem passam a "sem viagem" na lista e no menu.
+      [chavesViagens.todos, ['painel'], chavesDespesa.todas, chavesDespesa.viagens].map((queryKey) =>
+        queryClient.invalidateQueries({ queryKey }),
+      ),
+    );
+    aoFechar();
+  };
 
   const erros = form.formState.errors;
   const validarSeJaEnviou = { shouldValidate: form.formState.isSubmitted };
@@ -168,6 +186,19 @@ export function ViagemFormDialog({
           ) : null}
 
           <DialogFooter className="lg:col-span-2">
+            {viagem ? (
+              <BotaoApagar
+                rotulo="Apagar viagem"
+                desabilitado={gravar.isPending}
+                aoApagar={apagar}
+                descricao={
+                  <>
+                    A viagem {cidadeDoLugar(viagem.origem_nome)} → {cidadeDoLugar(viagem.destino_nome)} sai de
+                    Viagens e do Painel. {fraseDasDespesas(despesas?.length)}
+                  </>
+                }
+              />
+            ) : null}
             <Button type="button" variant="ghost" onClick={aoFechar} disabled={gravar.isPending}>
               Cancelar
             </Button>

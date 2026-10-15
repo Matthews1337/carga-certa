@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { cidadeDoLugar, kmDaViagem, mesDoInicio, tempoDesde } from '../apresentacao';
+import { cidadeDoLugar, fraseDasDespesas, kmDaViagem, mesDoInicio, tempoDesde } from '../apresentacao';
 
 describe('cidadeDoLugar', () => {
   it('endereco inteiro vira cidade e UF', () => {
@@ -62,5 +62,17 @@ describe('tempoDesde', () => {
 
   it('relogio adiantado nao vira tempo negativo', () => {
     expect(tempoDesde(antes(-10), agora)).toBe('agora há pouco');
+  });
+});
+
+describe('fraseDasDespesas', () => {
+  it('diz quantas despesas ficam, no singular e no plural', () => {
+    expect(fraseDasDespesas(1)).toBe('A despesa da viagem continua em Despesas, sem viagem.');
+    expect(fraseDasDespesas(7)).toBe('As 7 despesas da viagem continuam em Despesas, sem viagem.');
+  });
+
+  it('sem despesas, nao diz nada; carregando, diz sem numero', () => {
+    expect(fraseDasDespesas(0)).toBeNull();
+    expect(fraseDasDespesas(undefined)).toBe('As despesas da viagem continuam em Despesas, sem viagem.');
   });
 });
