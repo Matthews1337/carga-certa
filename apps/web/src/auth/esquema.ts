@@ -13,13 +13,37 @@ export type Modo = 'entrar' | 'criar';
  *
  * Quem exige o nome e `validarNome`, chamada so quando o modo e "criar".
  */
+const email = z.string().trim().email('E-mail inválido');
+
+// A mesma regra no cadastro e na senha nova: senao daria para trocar a senha
+// por uma mais curta do que o cadastro aceita.
+const senha = z.string().min(8, 'A senha precisa de pelo menos 8 caracteres');
+
 export const esquemaEntrada = z.object({
   nome: z.string().trim().optional(),
-  email: z.string().trim().email('E-mail inválido'),
-  senha: z.string().min(8, 'A senha precisa de pelo menos 8 caracteres'),
+  email,
+  senha,
 });
 
 export type CamposEntrada = z.infer<typeof esquemaEntrada>;
+
+/**
+ * Pedido do link de redefinicao. Formulario proprio, e nao um terceiro modo do
+ * de entrada: la a senha e obrigatoria e ficaria escondida - o mesmo botao sem
+ * reacao descrito acima.
+ */
+export const esquemaRecuperar = z.object({ email });
+
+export type CamposRecuperar = z.infer<typeof esquemaRecuperar>;
+
+export const esquemaNovaSenha = z
+  .object({ senha, repetir: z.string() })
+  .refine((v) => v.senha === v.repetir, {
+    path: ['repetir'],
+    message: 'As duas senhas não são iguais',
+  });
+
+export type CamposNovaSenha = z.infer<typeof esquemaNovaSenha>;
 
 /** Devolve a mensagem de erro, ou null quando o nome serve. */
 export function validarNome(modo: Modo, nome: string | undefined): string | null {

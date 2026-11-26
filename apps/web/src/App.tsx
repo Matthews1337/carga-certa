@@ -1,7 +1,9 @@
 import { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
+import { DesvioDaRecuperacao } from '@/auth/DesvioDaRecuperacao';
 import { LoginPage } from '@/auth/LoginPage';
+import { CAMINHO_NOVA_SENHA } from '@/auth/PedirLinkDeSenha';
 import { RequireAuth } from '@/auth/RequireAuth';
 import { Carregando } from '@/components/ui/feedback';
 import { AppShell, EmBreve } from '@/layout/AppShell';
@@ -35,11 +37,33 @@ const FretesPage = lazy(() =>
 const ViagensPage = lazy(() =>
   import('@/viagens/ViagensPage').then((m) => ({ default: m.ViagensPage })),
 );
+// Aberta so por quem clicou no link do e-mail de redefinicao.
+const NovaSenhaPage = lazy(() =>
+  import('@/auth/NovaSenhaPage').then((m) => ({ default: m.NovaSenhaPage })),
+);
 
 export function App() {
   return (
+    <>
+      <DesvioDaRecuperacao />
+      <Rotas />
+    </>
+  );
+}
+
+function Rotas() {
+  return (
     <Routes>
       <Route path="/entrar" element={<LoginPage />} />
+      {/* Fora do RequireAuth: sem sessao, a tela explica que o link venceu. */}
+      <Route
+        path={CAMINHO_NOVA_SENHA}
+        element={
+          <Suspense fallback={<Carregando />}>
+            <NovaSenhaPage />
+          </Suspense>
+        }
+      />
 
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>

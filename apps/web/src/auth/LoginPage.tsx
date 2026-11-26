@@ -1,6 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Truck } from 'lucide-react';
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Navigate, useLocation } from 'react-router-dom';
 
@@ -11,18 +10,20 @@ import {
   type CamposEntrada,
   type Modo,
 } from '@/auth/esquema';
+import { traduzirErroAuth } from '@/auth/mensagens';
+import { MensagemDeAviso, MensagemDeErro, MolduraDeEntrada } from '@/auth/MolduraDeEntrada';
+import { PedirLinkDeSenha } from '@/auth/PedirLinkDeSenha';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Campo } from '@/components/ui/campo';
 import { Spinner } from '@/components/ui/feedback';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { supabase } from '@/lib/supabase';
-import { BotaoTema } from '@/tema/BotaoTema';
 
 export function LoginPage() {
   const { session } = useAuth();
   const local = useLocation();
   const [modo, setModo] = useState<Modo>('entrar');
+  const [recuperando, setRecuperando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
 
@@ -34,6 +35,20 @@ export function LoginPage() {
   if (session) {
     const destino = (local.state as { de?: string } | null)?.de ?? '/despesas';
     return <Navigate to={destino} replace />;
+  }
+
+  if (recuperando) {
+    return (
+      <MolduraDeEntrada descricao="Informe seu e-mail e mandamos um link para criar uma senha nova">
+        <PedirLinkDeSenha
+          emailInicial={form.getValues('email')}
+          onVoltar={(email) => {
+            form.setValue('email', email);
+            setRecuperando(false);
+          }}
+        />
+      </MolduraDeEntrada>
+    );
   }
 
   const enviar = form.handleSubmit(
@@ -49,7 +64,7 @@ export function LoginPage() {
 
       if (modo === 'entrar') {
         const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-        if (error) setErro(traduzir(error.message));
+        if (error) setErro(traduzirErroAuth(error));
         return;
       }
 
@@ -58,11 +73,16 @@ export function LoginPage() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password: senha,
-        options: { data: { nome } },
+        options: {
+          data: { nome },
+          // O link de confirmacao volta para onde o cadastro foi feito (dev
+          // local ou Netlify), e nao para o Site URL do painel.
+          emailRedirectTo: window.location.origin,
+        },
       });
 
       if (error) {
-        setErro(traduzir(error.message));
+        setErro(traduzirErroAuth(error));
         return;
       }
 
@@ -77,126 +97,89 @@ export function LoginPage() {
     // acontecia quando o schema exigia tamanho minimo do nome durante o login.
     (erros) => {
       const primeira = Object.values(erros).find((e) => e?.message)?.message;
-      setErro(primeira ? String(primeira) : 'Confira os campos do formulario.');
+      setErro(primeira ? String(primeira) : 'Confira os campos do formulário.');
     },
   );
 
   const criando = modo === 'criar';
 
   return (
-    <div className="relative flex min-h-svh items-center justify-center bg-secondary/40 p-4">
-      <div className="absolute right-3 top-3">
-        <BotaoTema />
-      </div>
+    <MolduraDeEntrada
+      descricao={
+        criando
+          ? 'Crie sua conta para começar a registrar os gastos'
+          : 'Entre para acompanhar seus fretes e gastos'
+      }
+    >
+      <form onSubmit={enviar} className="flex flex-col gap-4" noValidate>
+        {criando ? (
+          <Campo rotulo="Nome" erro={form.formState.errors.nome?.message}>
+            <Input
+              {...form.register('nome')}
+              autoComplete="name"
+              placeholder="João da Silva"
+              aria-invalid={!!form.formState.errors.nome}
+            />
+          </Campo>
+        ) : null}
 
-      <Card className="w-full max-w-md">
-        <CardHeader className="items-center text-center">
-          <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-            <Truck className="size-6" aria-hidden />
-          </div>
-          <CardTitle className="text-2xl">Carga Certa</CardTitle>
-          <CardDescription>
-            {criando
-              ? 'Crie sua conta para começar a registrar os gastos'
-              : 'Entre para acompanhar seus fretes e gastos'}
-          </CardDescription>
-        </CardHeader>
+        <Campo rotulo="E-mail" erro={form.formState.errors.email?.message}>
+          <Input
+            {...form.register('email')}
+            type="email"
+            autoComplete="email"
+            placeholder="nome@exemplo.com"
+            aria-invalid={!!form.formState.errors.email}
+          />
+        </Campo>
 
-        <CardContent>
-          <form onSubmit={enviar} className="flex flex-col gap-4" noValidate>
-            {criando ? (
-              <Campo rotulo="Nome" erro={form.formState.errors.nome?.message}>
-                <Input
-                  {...form.register('nome')}
-                  autoComplete="name"
-                  placeholder="João da Silva"
-                  aria-invalid={!!form.formState.errors.nome}
-                />
-              </Campo>
-            ) : null}
-
-            <Campo rotulo="E-mail" erro={form.formState.errors.email?.message}>
-              <Input
-                {...form.register('email')}
-                type="email"
-                autoComplete="email"
-                placeholder="nome@exemplo.com"
-                aria-invalid={!!form.formState.errors.email}
-              />
-            </Campo>
-
-            <Campo rotulo="Senha" erro={form.formState.errors.senha?.message}>
-              <Input
-                {...form.register('senha')}
-                type="password"
-                autoComplete={criando ? 'new-password' : 'current-password'}
-                aria-invalid={!!form.formState.errors.senha}
-              />
-            </Campo>
-
-            {erro ? (
-              <p role="alert" className="text-sm font-medium text-destructive">
-                {erro}
-              </p>
-            ) : null}
-            {aviso ? (
-              <p role="status" className="text-sm font-medium text-success">
-                {aviso}
-              </p>
-            ) : null}
-
-            <Button type="submit" variant="accent" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? <Spinner /> : null}
-              {criando ? 'Criar conta' : 'Entrar'}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            {criando ? 'Já tem conta?' : 'Ainda não tem conta?'}{' '}
+        <div className="flex flex-col gap-1">
+          <Campo rotulo="Senha" erro={form.formState.errors.senha?.message}>
+            <Input
+              {...form.register('senha')}
+              type="password"
+              autoComplete={criando ? 'new-password' : 'current-password'}
+              aria-invalid={!!form.formState.errors.senha}
+            />
+          </Campo>
+          {criando ? null : (
             <button
               type="button"
-              className="font-medium text-foreground underline underline-offset-4"
+              className="self-end py-1 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
               onClick={() => {
-                setModo(criando ? 'entrar' : 'criar');
                 setErro(null);
                 setAviso(null);
+                setRecuperando(true);
               }}
             >
-              {criando ? 'Entrar' : 'Criar agora'}
+              Esqueci minha senha
             </button>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+          )}
+        </div>
 
-function Campo({
-  rotulo,
-  erro,
-  children,
-}: {
-  rotulo: string;
-  erro?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <Label>{rotulo}</Label>
-      {children}
-      {erro ? <p className="text-sm text-destructive">{erro}</p> : null}
-    </div>
-  );
-}
+        {erro ? <MensagemDeErro>{erro}</MensagemDeErro> : null}
+        {aviso ? <MensagemDeAviso>{aviso}</MensagemDeAviso> : null}
 
-/** O GoTrue responde em ingles; estas sao as mensagens que o usuario ve de fato. */
-function traduzir(mensagem: string): string {
-  const mapa: Record<string, string> = {
-    'Invalid login credentials': 'E-mail ou senha incorretos.',
-    'Email not confirmed': 'Confirme seu e-mail antes de entrar.',
-    'User already registered': 'Já existe uma conta com este e-mail.',
-    'Password should be at least 6 characters':
-      'A senha precisa de pelo menos 6 caracteres.',
-  };
-  return mapa[mensagem] ?? mensagem;
+        <Button type="submit" variant="accent" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? <Spinner /> : null}
+          {criando ? 'Criar conta' : 'Entrar'}
+        </Button>
+      </form>
+
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        {criando ? 'Já tem conta?' : 'Ainda não tem conta?'}{' '}
+        <button
+          type="button"
+          className="font-medium text-foreground underline underline-offset-4"
+          onClick={() => {
+            setModo(criando ? 'entrar' : 'criar');
+            setErro(null);
+            setAviso(null);
+          }}
+        >
+          {criando ? 'Entrar' : 'Criar agora'}
+        </button>
+      </p>
+    </MolduraDeEntrada>
+  );
 }

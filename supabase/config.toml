@@ -159,7 +159,10 @@ site_url = "http://127.0.0.1:5173"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+# Os links dos e-mails voltam para a origem de quem pediu (`/nova-senha` na
+# redefinicao). No remoto, o equivalente e Authentication -> URL Configuration
+# -> Redirect URLs, com o endereco da Netlify seguido de /**.
+additional_redirect_urls = ["http://127.0.0.1:5173/**", "http://localhost:5173/**"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -223,15 +226,15 @@ enable_signup = true
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
 #
-# Desligado de proposito, e o remoto precisa ficar igual (Authentication ->
-# Providers -> Email -> Confirm email). Confirmar exige SMTP proprio, e o
-# servico embutido do Supabase recusa entregar para qualquer endereco fora da
-# equipe do projeto - ou seja, funcionaria so para nos e falharia calado para
-# todo caminhoneiro de verdade.
+# Ligado desde que o remoto ganhou SMTP proprio (Gmail com senha de app). O
+# remoto precisa ficar igual: Authentication -> Sign In / Providers -> Email ->
+# Confirm email. Sem SMTP proprio, desligue nos dois lugares: o servico
+# embutido do Supabase so entrega para a equipe do projeto, e o cadastro de
+# todo caminhoneiro de verdade travaria esperando um e-mail que nunca chega.
 #
-# O preco aceito: ninguem valida o endereco digitado, e nao ha recuperacao de
-# senha, que depende do mesmo e-mail. Ao plugar SMTP, religue aqui E no painel.
-enable_confirmations = false
+# No local nada e enviado: os e-mails aparecem no Mailpit, em
+# http://127.0.0.1:54324.
+enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
@@ -251,16 +254,21 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Modelos em portugues. O remoto NAO le estes arquivos: o texto e colado a mao
+# em Authentication -> Emails -> Templates, com o mesmo assunto. Mudou aqui,
+# mude la.
+[auth.email.template.confirmation]
+subject = "Confirme seu cadastro no Carga Certa"
+content_path = "./supabase/templates/confirmacao.html"
 
-# Uncomment to customize notification email template
-# [auth.email.notification.password_changed]
-# enabled = true
-# subject = "Your password has been changed"
-# content_path = "./supabase/templates/password_changed_notification.html"
+[auth.email.template.recovery]
+subject = "Crie uma senha nova no Carga Certa"
+content_path = "./supabase/templates/recuperacao.html"
+
+[auth.email.notification.password_changed]
+enabled = true
+subject = "Sua senha do Carga Certa foi alterada"
+content_path = "./supabase/templates/senha-alterada.html"
 
 [auth.sms]
 # Allow/disallow new user signups via SMS to your project.

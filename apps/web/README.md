@@ -27,7 +27,7 @@ de `.env.example`.
 
 ```
 src/
-  auth/         sessao, rota protegida e tela de entrada
+  auth/         sessao, rota protegida, tela de entrada e redefinicao de senha
   components/ui componentes no estilo shadcn, versionados aqui e nao em node_modules
   despesas/     a fatia vertical completa: consulta, formulario, exclusao, comprovante
   layout/       shell com a navegacao de todas as secoes
@@ -60,6 +60,26 @@ mesmo esquema de id que o mobile usa offline.
 usuario porque a policy do Storage compara o primeiro segmento da pasta com
 `auth.uid()`. Monte sempre com `caminhoComprovante()`. A URL assinada e gerada
 no clique e expira em uma hora.
+
+## E-mails de autenticacao
+
+Confirmacao de cadastro e redefinicao de senha dependem do SMTP proprio do
+projeto remoto (Authentication -> Emails -> SMTP Settings). O servico embutido
+do Supabase so entrega para a equipe do projeto: sem SMTP, desligue o "Confirm
+email" no painel e no `supabase/config.toml`.
+
+Os links dos e-mails voltam para a origem de quem pediu (`window.location.origin`),
+e o Supabase so aceita destinos da lista de Redirect URLs. No remoto, ela precisa
+do endereco da Netlify seguido de `/**`; o Site URL e o endereco da Netlify.
+
+O link de redefinicao ja entra com sessao. O `AuthProvider` marca
+`recuperandoSenha` no evento `PASSWORD_RECOVERY`, e o `DesvioDaRecuperacao` leva
+para `/nova-senha` quem cair em outra rota - senao a pessoa ficaria logada sem
+nunca escolher a senha nova.
+
+Os modelos em portugues ficam em `supabase/templates/` e valem para o banco
+local. O remoto nao le esses arquivos: o texto e o assunto sao colados a mao em
+Authentication -> Emails -> Templates.
 
 ## Tema
 
@@ -130,9 +150,6 @@ o mesmo layout roda em tablet dentro da cabine, e nao ha classes `animate-in`,
 que exigiriam o `tw-animate-css`.
 
 ## Pendencias
-
-Falta recuperacao de senha na tela de entrada - e ela depende de SMTP proprio,
-que depende de dominio verificado. Ate la, a confirmacao de e-mail esta desligada.
 
 A CSP esta em modo relatorio (ver Seguranca). Trocar para bloqueio e decisao
 pendente, depois de um periodo de uso sem aviso.

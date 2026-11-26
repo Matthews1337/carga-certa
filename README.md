@@ -41,8 +41,10 @@ banco esta em uso, avisa se o Docker estiver parado e grita se alguem apontar o
 dev para um banco remoto.
 
 A conta que voce usa no site da Netlify **nao existe** no banco local - sao
-bancos separados. Crie uma conta local em "Criar agora" (a confirmacao de e-mail
-esta desligada no local); ela some a cada `db:reset`.
+bancos separados. Crie uma conta local em "Criar agora" e confirme pelo link do
+e-mail; ela some a cada `db:reset`. O local nao envia e-mail de verdade: a
+confirmacao e o link de "Esqueci minha senha" aparecem no Mailpit, em
+http://127.0.0.1:54324.
 
 O `corepack` vem com o Node e dispensa instalar o pnpm globalmente. Depois de
 `corepack enable` (uma vez, como administrador no Windows), `pnpm` funciona
