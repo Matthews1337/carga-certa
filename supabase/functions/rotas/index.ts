@@ -15,7 +15,12 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-const ORS = 'https://api.openrouteservice.org';
+// O ORS saiu de api.openrouteservice.org (410 desde 2026-11-24) para
+// api.heigit.org, com a mesma chave e o mesmo formato: rota em
+// /openrouteservice e busca de lugares (Pelias) em /pelias/v1.
+// https://ask.openrouteservice.org/t/deprecating-api-openrouteservice-org-in-favour-of-api-heigit-org/7912
+const ORS_ROTAS = 'https://api.heigit.org/openrouteservice';
+const ORS_LUGARES = 'https://api.heigit.org/pelias/v1';
 
 // Distancia maxima ate a estrada mais proxima de cada ponto. O padrao do ORS e
 // 350 m: uma fazenda ou um patio a 1 km da rodovia daria "ponto nao roteavel".
@@ -103,7 +108,7 @@ async function buscar(chave: string, corpo: Record<string, unknown>): Promise<Re
   if (texto.length < 3) throw new ErroDeEntrada('Digite pelo menos 3 letras.');
   if (texto.length > 120) throw new ErroDeEntrada('Busca longa demais.');
 
-  const url = new URL(`${ORS}/geocode/autocomplete`);
+  const url = new URL(`${ORS_LUGARES}/autocomplete`);
   url.searchParams.set('text', texto);
   url.searchParams.set('boundary.country', 'BR');
   url.searchParams.set('size', '6');
@@ -124,16 +129,28 @@ async function buscar(chave: string, corpo: Record<string, unknown>): Promise<Re
 async function endereco(chave: string, corpo: Record<string, unknown>): Promise<Response> {
   const ponto = coordenada(corpo, 'ponto');
 
-  const url = new URL(`${ORS}/geocode/reverse`);
-  url.searchParams.set('point.lat', String(ponto.lat));
-  url.searchParams.set('point.lon', String(ponto.lng));
-  url.searchParams.set('boundary.country', 'BR');
-  url.searchParams.set('size', '1');
+  // Primeiro so endereco e rua: sem o filtro, o mais perto costuma ser um
+  // ponto de onibus ou uma loja (pedido do usuario em 2026-11-28, que viu
+  // "Ponto Final Sao Goncalo" no lugar da rua). Sem rua por perto (estrada de
+  // terra, fazenda), uma segunda consulta pega o que houver: cidade, bairro.
+  const consultar = async (camadas?: string) => {
+    const url = new URL(`${ORS_LUGARES}/reverse`);
+    url.searchParams.set('point.lat', String(ponto.lat));
+    url.searchParams.set('point.lon', String(ponto.lng));
+    url.searchParams.set('boundary.country', 'BR');
+    url.searchParams.set('size', '1');
+    if (camadas) url.searchParams.set('layers', camadas);
+    return chamarOrs(chave, url);
+  };
 
-  const r = await chamarOrs(chave, url);
+  let r = await consultar('address,street');
   if (!r.ok) return erroDoOrs(r);
-  const dados = await r.json();
-  const [lugar] = lugaresDe(dados);
+  let [lugar] = lugaresDe(await r.json());
+  if (!lugar) {
+    r = await consultar();
+    if (!r.ok) return erroDoOrs(r);
+    [lugar] = lugaresDe(await r.json());
+  }
   // Devolve o ponto clicado, e nao o do endereco achado: o motorista marcou
   // o patio, e o endereco mais proximo pode estar a 300 m dali.
   return resposta({ lugar: lugar ? { ...lugar, lat: ponto.lat, lng: ponto.lng } : null });
@@ -143,7 +160,7 @@ async function rota(chave: string, corpo: Record<string, unknown>): Promise<Resp
   const origem = coordenada(corpo.origem, 'origem');
   const destino = coordenada(corpo.destino, 'destino');
 
-  const r = await chamarOrs(chave, new URL(`${ORS}/v2/directions/driving-hgv`), {
+  const r = await chamarOrs(chave, new URL(`${ORS_ROTAS}/v2/directions/driving-hgv`), {
     // ORS usa [longitude, latitude].
     coordinates: [
       [origem.lng, origem.lat],
