@@ -6,6 +6,7 @@ import {
   somar,
   type EscopoCategoria,
   type Json,
+  type LeituraDePosicao,
   type StatusDespesa,
   type StatusViagem,
 } from '@carga-certa/shared';
@@ -104,6 +105,44 @@ export async function ultimasPosicoes(viagemIds: string[]): Promise<Map<string, 
     }
   }
   return mapa;
+}
+
+// ---------------------------------------------------- posicao do aparelho ---
+
+/** Leitura do GPS com o id ja escolhido: reenviar a mesma nao duplica. */
+export interface PosicaoParaGravar {
+  id: string;
+  leitura: LeituraDePosicao;
+}
+
+/**
+ * Grava posicoes lidas pelo navegador ("Enviar minha posicao" e "Gravar
+ * trajeto"). Insert direto, e nao o push_changes: nada que ja existe muda.
+ *
+ * - `piloto_id` vem do DEFAULT auth.uid();
+ * - posicao de viagem apagada e descartada em silencio pelo trigger
+ *   descarta_posicao_orfa, sem erro;
+ * - `ignoreDuplicates`: se a rede caiu depois do banco gravar, o reenvio do
+ *   mesmo lote nao vira violacao de chave - senao a fila travaria ali.
+ */
+export async function gravarPosicoes(viagemId: string, posicoes: PosicaoParaGravar[]): Promise<void> {
+  if (posicoes.length === 0) return;
+  const arredondar = (valor: number, casas: number) => Math.round(valor * 10 ** casas) / 10 ** casas;
+
+  const { error } = await supabase.from('posicao_viagem').upsert(
+    posicoes.map(({ id, leitura }) => ({
+      id,
+      viagem_id: viagemId,
+      latitude: arredondar(leitura.lat, 6),
+      longitude: arredondar(leitura.lng, 6),
+      // numeric(7,1): ate 999.999,9 m - computador sem Wi-Fi pode passar disso.
+      precisao_m: Math.min(arredondar(leitura.precisaoM, 1), 999_999.9),
+      // Hora da leitura, e nao do envio: o ponto pode subir depois, sem sinal.
+      registrado_em: new Date(leitura.em).toISOString(),
+    })),
+    { onConflict: 'id', ignoreDuplicates: true },
+  );
+  if (error) throw new Error(error.message);
 }
 
 // ------------------------------------------------------- viagens sem frete ---

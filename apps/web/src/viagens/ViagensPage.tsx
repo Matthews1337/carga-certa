@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Carregando, ErroConsulta, Vazio } from '@/components/ui/feedback';
+import { CabecalhoDaPagina } from '@/layout/CabecalhoDaPagina';
 import { cn } from '@/lib/utils';
 import { chavesViagens, listarViagensSemFrete, type ViagemDaLista } from '@/viagens/api';
 import { cidadeDoLugar, kmDaViagem, mesDoInicio } from '@/viagens/apresentacao';
@@ -40,18 +41,16 @@ export function ViagensPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Viagens</h1>
-          <p className="text-sm text-muted-foreground">
-            Deslocamentos sem frete: ir vazio até a coleta, voltar depois da entrega, ir à oficina.
-          </p>
-        </div>
-        <Button variant="accent" onClick={nova}>
+      <CabecalhoDaPagina
+        titulo="Viagens"
+        descricao="Deslocamentos sem frete: ir vazio até a coleta, voltar depois da entrega, ir à oficina."
+        tour="viagens"
+      >
+        <Button variant="accent" data-tour="viagens-nova" onClick={nova}>
           <Plus className="size-4" aria-hidden />
           Nova viagem
         </Button>
-      </header>
+      </CabecalhoDaPagina>
 
       {viagens.isPending ? (
         <Carregando />
@@ -70,8 +69,14 @@ export function ViagensPage() {
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {viagens.data.map((v) => (
-            <CartaoViagem key={v.id} viagem={v} aoAbrir={() => setDetalhe(v.id)} />
+          {viagens.data.map((v, i) => (
+            <CartaoViagem
+              key={v.id}
+              viagem={v}
+              aoAbrir={() => setDetalhe(v.id)}
+              // O tour do botao "i" destaca so o primeiro card.
+              tour={i === 0 ? 'viagens-card' : undefined}
+            />
           ))}
         </div>
       )}
@@ -103,7 +108,15 @@ const SELO: Partial<Record<StatusViagem, 'warning' | 'default' | 'destructive'>>
   CANCELADA: 'destructive',
 };
 
-function CartaoViagem({ viagem: v, aoAbrir }: { viagem: ViagemDaLista; aoAbrir: () => void }) {
+function CartaoViagem({
+  viagem: v,
+  aoAbrir,
+  tour,
+}: {
+  viagem: ViagemDaLista;
+  aoAbrir: () => void;
+  tour?: string;
+}) {
   const origem = cidadeDoLugar(v.origem_nome);
   const destino = cidadeDoLugar(v.destino_nome);
   const { km, previsto } = kmDaViagem(v);
@@ -114,6 +127,7 @@ function CartaoViagem({ viagem: v, aoAbrir }: { viagem: ViagemDaLista; aoAbrir: 
   // vale em qualquer lugar, e o leitor de tela anuncia so o trajeto.
   return (
     <article
+      data-tour={tour}
       className={cn(
         'relative flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground',
         'transition-colors hover:border-accent has-focus-visible:ring-2 has-focus-visible:ring-ring',

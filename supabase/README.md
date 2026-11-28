@@ -149,6 +149,11 @@ não desce no pull**: só o aparelho que gravou a trilha precisa dela. O web lê
 última posição de cada viagem pela view `vw_posicao_atual`, que ignora posição
 com hora no futuro (relógio de celular adiantado).
 
+O site também grava posição, pelo GPS do navegador ("Enviar minha posição" e
+"Gravar trajeto", no detalhe do frete e da viagem): insert direto, com o `id`
+escolhido no aparelho e `ignoreDuplicates`, para o reenvio de um lote que já
+tinha gravado não virar erro. `registrado_em` é a hora da leitura do GPS.
+
 A última posição **não** é copiada para a viagem por trigger: o celular reenvia a
 viagem inteira a cada edição, e a posição antiga guardada nele sobrescreveria a
 nova.

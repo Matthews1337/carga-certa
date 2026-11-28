@@ -94,15 +94,18 @@ export default defineConfig(({ command, mode }) => {
             topo do modulo e executado. O erro nao aparece no build - so no
             navegador, em tela branca. Mantenha tudo junto.
 
-            A UNICA excecao e o MapLibre: sozinho ele pesa mais que o resto das
-            dependencias, e so a tela de fretes usa. No vendor, todo motorista
-            o baixaria no login. Separar e seguro porque ele nao importa o
-            React - e um bundle fechado, com os proprios workers dentro - e a
-            regra acima e sobre quem depende do React.
+            As excecoes sao o MapLibre e o driver.js. O MapLibre, sozinho, pesa
+            mais que o resto das dependencias, e so os mapas usam; o driver.js
+            (destaques do tutorial) so roda num tour, que quase nenhuma sessao
+            abre. No vendor, todo motorista baixaria os dois no login. Separar
+            e seguro porque nenhum deles importa o React - a regra acima e
+            sobre quem depende dele.
           */
           manualChunks(id) {
             if (!id.includes('node_modules')) return undefined;
-            return id.includes('maplibre-gl') ? 'maplibre' : 'vendor';
+            if (id.includes('maplibre-gl')) return 'maplibre';
+            if (id.includes('driver.js')) return 'tutorial';
+            return 'vendor';
           },
         },
       },

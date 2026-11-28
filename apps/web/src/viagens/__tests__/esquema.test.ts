@@ -7,8 +7,27 @@ import {
   inicioDaViagem,
   meioDiaLocal,
   paraRegistroViagem,
+  pinoDoClique,
   type CamposViagem,
 } from '../esquema';
+
+describe('pinoDoClique', () => {
+  const uberlandia = { lat: -18.9186, lng: -48.2772 };
+  const rioVerde = { lat: -17.7978, lng: -50.928 };
+
+  it('marca o que falta, na ordem: primeiro o inicio, depois o fim', () => {
+    expect(pinoDoClique(null, null, rioVerde)).toBe('origem');
+    expect(pinoDoClique(null, rioVerde, uberlandia)).toBe('origem');
+    expect(pinoDoClique(uberlandia, null, uberlandia)).toBe('destino');
+  });
+
+  it('com os dois marcados, move o pino mais perto do clique', () => {
+    const pertoDeRioVerde = { lat: -17.85, lng: -50.8 };
+    const pertoDeUberlandia = { lat: -18.95, lng: -48.4 };
+    expect(pinoDoClique(uberlandia, rioVerde, pertoDeRioVerde)).toBe('destino');
+    expect(pinoDoClique(uberlandia, rioVerde, pertoDeUberlandia)).toBe('origem');
+  });
+});
 
 const base: CamposViagem = {
   origem: { nome: 'Uberlândia, MG', lat: -18.9186, lng: -48.2772 },

@@ -30,9 +30,10 @@ src/
   auth/         sessao, rota protegida, tela de entrada e redefinicao de senha
   components/ui componentes no estilo shadcn, versionados aqui e nao em node_modules
   despesas/     a fatia vertical completa: consulta, formulario, exclusao, comprovante
-  layout/       shell com a navegacao de todas as secoes
+  layout/       shell com a navegacao, as secoes do menu e o cabecalho das paginas
   lib/          cliente do Supabase, validacao do ambiente e utilitarios
   tema/         claro / escuro / automatico
+  tutorial/     tour de boas-vindas e o botao "i" de cada tela (driver.js)
 plugins/        plugins do Vite que rodam no build (cabecalhos de seguranca)
 ```
 
@@ -60,6 +61,38 @@ mesmo esquema de id que o mobile usa offline.
 usuario porque a policy do Storage compara o primeiro segmento da pasta com
 `auth.uid()`. Monte sempre com `caminhoComprovante()`. A URL assinada e gerada
 no clique e expira em uma hora.
+
+## Tutorial
+
+Todo usuario ve um tour do menu na primeira entrada, com "Pular tutorial". O
+fim (`concluido` ou `pulado`) fica em `user_metadata.tutorial` no Supabase Auth,
+com copia no `localStorage` para quando a gravacao falha sem sinal.
+
+Cada tela usa o `CabecalhoDaPagina`: titulo, descricao e o botao "i", que mostra
+a descricao como dica e percorre os itens da tela. Os textos ficam em
+`tutorial/passos.ts`, e cada alvo e marcado no JSX com `data-tour`. Tela nova:
+use o `CabecalhoDaPagina`, marque os itens e escreva o roteiro em `passos.ts`.
+Passo cujo alvo nao esta visivel e pulado (menu do celular, lista vazia).
+
+## GPS pelo navegador
+
+Tres usos, todos em `src/viagens/`: "Usar minha localizacao" no inicio do
+formulario de frete e de viagem, e "Enviar minha posicao" e "Gravar trajeto" no
+detalhe da viagem em aberto (`PosicaoDoAparelho`). A leitura fica em `gps.ts`; a
+regra de quando a posicao serve e de quando gravar mais um ponto fica no shared
+(`posicao.ts`), porque o app de celular vai usar a mesma.
+
+- Toda leitura traz a precisao. Acima de 250 m (computador no cabo, iPhone sem
+  "Localizacao Precisa") o envio avulso pergunta antes de gravar, e o trajeto
+  nao grava o ponto.
+- O trajeto grava no maximo um ponto a cada 2 min, e parado um a cada 10 min.
+  Sem sinal, os pontos ficam numa fila e sobem juntos depois.
+- Limite do site: com a tela bloqueada ou o navegador em segundo plano, o
+  iPhone e o Android param de entregar posicao. A gravacao pede para a tela
+  nao apagar (Wake Lock), e para quando o detalhe fecha. Trajeto com o celular
+  bloqueado so o app instalado vai gravar.
+- A API so existe em contexto seguro: HTTPS ou localhost. Abrir o dev pelo IP
+  da rede (192.168...) no celular nao oferece a localizacao.
 
 ## E-mails de autenticacao
 

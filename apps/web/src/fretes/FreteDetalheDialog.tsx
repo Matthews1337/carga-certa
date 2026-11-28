@@ -110,7 +110,7 @@ function Conteudo({ frete, aoEditar }: { frete: FreteDaLista; aoEditar: (frete: 
         </DialogDescription>
       </DialogHeader>
 
-      <MapaDoDetalhe viagem={v} posicao={frete.posicao} />
+      <MapaDoDetalhe viagem={v} posicao={frete.posicao} chaveDaLista={chavesFretes.lista} />
 
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Numero rotulo="Valor combinado">

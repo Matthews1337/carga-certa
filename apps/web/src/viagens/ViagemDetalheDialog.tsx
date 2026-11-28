@@ -81,7 +81,7 @@ function Conteudo({ viagem: v, aoEditar }: { viagem: ViagemDaLista; aoEditar: (v
         </DialogDescription>
       </DialogHeader>
 
-      <MapaDoDetalhe viagem={v} posicao={v.posicao} />
+      <MapaDoDetalhe viagem={v} posicao={v.posicao} chaveDaLista={chavesViagens.lista} />
 
       <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Numero rotulo="Gastos da viagem" dica="Sem as despesas canceladas">

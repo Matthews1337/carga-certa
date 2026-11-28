@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { ConfirmarExclusao } from '@/components/ui/confirmar-exclusao';
 import { Carregando, ErroConsulta, Vazio } from '@/components/ui/feedback';
+import { CabecalhoDaPagina } from '@/layout/CabecalhoDaPagina';
 import { cn } from '@/lib/utils';
 import {
   chavesVeiculos,
@@ -68,18 +69,16 @@ export function VeiculosPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Veículos</h1>
-          <p className="text-sm text-muted-foreground">
-            Caminhões, cavalos e carretas, com os documentos de cada um.
-          </p>
-        </div>
-        <Button variant="accent" onClick={novo}>
+      <CabecalhoDaPagina
+        titulo="Veículos"
+        descricao="Caminhões, cavalos e carretas, com os documentos de cada um."
+        tour="veiculos"
+      >
+        <Button variant="accent" data-tour="veiculos-novo" onClick={novo}>
           <Plus className="size-4" aria-hidden />
           Novo veículo
         </Button>
-      </header>
+      </CabecalhoDaPagina>
 
       {veiculos.isPending ? (
         <Carregando />
@@ -97,16 +96,18 @@ export function VeiculosPage() {
           }
         />
       ) : (
-        grupos.map((grupo) => (
+        grupos.map((grupo, g) => (
           <section key={grupo.natureza} className="flex flex-col gap-3">
             <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               {TITULO_DO_GRUPO[grupo.natureza]} · {grupo.veiculos.length}
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {grupo.veiculos.map((v) => (
+              {grupo.veiculos.map((v, i) => (
                 <CartaoVeiculo
                   key={v.id}
                   veiculo={v}
+                  // O tour do botao "i" destaca so o primeiro card.
+                  primeiroDaTela={g === 0 && i === 0}
                   aoAbrirDocumentos={() => setDocumentosDe(v)}
                   aoEditar={() => {
                     setEditando(v);
@@ -150,11 +151,13 @@ export function VeiculosPage() {
 
 function CartaoVeiculo({
   veiculo: v,
+  primeiroDaTela,
   aoAbrirDocumentos,
   aoEditar,
   aoExcluir,
 }: {
   veiculo: VeiculoDaLista;
+  primeiroDaTela: boolean;
   aoAbrirDocumentos: () => void;
   aoEditar: () => void;
   aoExcluir: () => void;
@@ -165,7 +168,10 @@ function CartaoVeiculo({
     .join(' · ');
 
   return (
-    <Card className={cn('flex flex-col', !v.ativo && 'opacity-70')}>
+    <Card
+      data-tour={primeiroDaTela ? 'veiculos-card' : undefined}
+      className={cn('flex flex-col', !v.ativo && 'opacity-70')}
+    >
       <CardContent className="flex flex-1 flex-col gap-4 p-5 pt-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -198,6 +204,7 @@ function CartaoVeiculo({
         <Button
           variant="outline"
           size="sm"
+          data-tour={primeiroDaTela ? 'veiculos-documentos' : undefined}
           aria-label={`Documentos de ${placa}: ${v.documentos.length}`}
           onClick={aoAbrirDocumentos}
         >

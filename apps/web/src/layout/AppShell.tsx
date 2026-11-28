@@ -1,50 +1,29 @@
-import {
-  Building2,
-  Construction,
-  FileText,
-  LayoutDashboard,
-  LogOut,
-  Menu,
-  Receipt,
-  Route,
-  Truck,
-  Wallet,
-  X,
-} from 'lucide-react';
+import { Construction, LogOut, Menu, Truck, X } from 'lucide-react';
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 
 import { useAuth } from '@/auth/AuthProvider';
 import { Button } from '@/components/ui/button';
+import { SECOES } from '@/layout/secoes';
 import { cn } from '@/lib/utils';
 import { BotaoTema } from '@/tema/BotaoTema';
+import { TutorialDeBoasVindas } from '@/tutorial/TutorialDeBoasVindas';
 
 /**
- * Navegacao do app.
+ * Navegacao do app. As secoes estao em `secoes.ts`.
  *
- * As secoes que ainda nao existem levam para a tela "em breve" em vez de
- * sumirem do menu: o mapa completo do produto fica visivel desde o comeco.
- *
- * Fretes e Viagens: o card do frete ja traz a viagem dele; Viagens lista as
- * viagens SEM frete (deslocamento vazio, retorno, oficina). Saiu do menu em
- * 2026-09-28 e voltou em 2026-10-15, a pedido do usuario.
+ * Os `data-tour` marcam o que o tutorial de boas-vindas destaca. O tema
+ * aparece duas vezes (barra do celular e menu lateral) com a mesma marca: o
+ * tour usa a que estiver visivel.
  */
-const SECOES = [
-  { para: '/painel', rotulo: 'Painel', icone: LayoutDashboard },
-  { para: '/despesas', rotulo: 'Despesas', icone: Receipt },
-  { para: '/fretes', rotulo: 'Fretes', icone: Wallet },
-  { para: '/viagens', rotulo: 'Viagens', icone: Route },
-  { para: '/veiculos', rotulo: 'Veículos', icone: Truck },
-  { para: '/contratantes', rotulo: 'Contratantes', icone: Building2 },
-  { para: '/documentos', rotulo: 'Documentos', icone: FileText },
-] as const;
-
 export function AppShell() {
   const { user, sair } = useAuth();
   const [menuAberto, setMenuAberto] = useState(false);
 
   return (
     <div className="flex min-h-svh flex-col lg:flex-row">
+      <TutorialDeBoasVindas />
+
       {/* Barra superior: so aparece no estreito, onde a lateral vira gaveta */}
       <header className="flex items-center justify-between border-b border-border px-4 py-3 lg:hidden">
         <div className="flex items-center gap-2 font-semibold">
@@ -52,10 +31,13 @@ export function AppShell() {
           Carga Certa
         </div>
         <div className="flex items-center gap-1">
-          <BotaoTema />
+          <div data-tour="tema">
+            <BotaoTema />
+          </div>
           <Button
             variant="ghost"
             size="icon"
+            data-tour="menu-abrir"
             onClick={() => setMenuAberto((v) => !v)}
             aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
             aria-expanded={menuAberto}
@@ -78,10 +60,11 @@ export function AppShell() {
         </div>
 
         <nav className="flex flex-1 flex-col gap-0.5 p-3">
-          {SECOES.map(({ para, rotulo, icone: Icone }) => (
+          {SECOES.map(({ para, rotulo, icone: Icone, tour }) => (
             <NavLink
               key={para}
               to={para}
+              data-tour={tour}
               onClick={() => setMenuAberto(false)}
               className={({ isActive }) =>
                 cn(
@@ -102,8 +85,16 @@ export function AppShell() {
           <p className="truncate px-3 pb-2 text-xs text-muted-foreground" title={user?.email ?? ''}>
             {user?.email}
           </p>
-          <BotaoTema comRotulo />
-          <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => void sair()}>
+          <div data-tour="tema">
+            <BotaoTema comRotulo />
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start"
+            data-tour="sair"
+            onClick={() => void sair()}
+          >
             <LogOut className="size-4" aria-hidden />
             Sair
           </Button>

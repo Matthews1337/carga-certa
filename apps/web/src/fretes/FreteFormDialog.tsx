@@ -80,15 +80,13 @@ export function FreteFormDialog({
     definir: (qual, lugar) => form.setValue(qual, lugar, { shouldValidate: form.formState.isSubmitted }),
   });
 
-  const { setMarcando } = rota;
   useEffect(() => {
     if (aberto) {
       form.reset(valoresIniciais(frete));
       setErro(null);
-      setMarcando(frete?.viagem ? 'destino' : 'origem');
       setAbertura((n) => n + 1);
     }
-  }, [aberto, frete, form, setMarcando]);
+  }, [aberto, frete, form]);
 
   const gravar = useMutation({
     mutationFn: async (campos: CamposFrete) => {
@@ -166,6 +164,7 @@ export function FreteFormDialog({
               origem={origem}
               destino={destino}
               aoMudar={(qual, lugar) => form.setValue(qual, lugar, validarSeJaEnviou)}
+              aoMarcarOrigem={(ponto) => void rota.marcar('origem', ponto)}
               erros={{ origem: erros.origem?.message, destino: erros.destino?.message }}
             />
 

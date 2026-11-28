@@ -141,3 +141,140 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+/*
+  Balao do tutorial (driver.js), nos tokens do app - vale nos dois temas.
+
+  O CSS da biblioteca chega por import dinamico, DEPOIS deste arquivo. Por isso
+  todo seletor daqui comeca com .driver-popover.tour-carga-certa: ganha pela
+  especificidade, e nao pela ordem, que perderia.
+*/
+.driver-popover.tour-carga-certa {
+  min-width: 16rem;
+  max-width: min(22rem, calc(100vw - 2rem));
+  padding: 1rem 1.125rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+  font-family: inherit;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+}
+
+.driver-popover.tour-carga-certa .driver-popover-title {
+  padding-right: 2rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.driver-popover.tour-carga-certa .driver-popover-description {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* 44px de alvo, como os outros controles: o tablet roda na cabine. */
+.driver-popover.tour-carga-certa .driver-popover-close-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  color: var(--muted-foreground);
+  font-size: 1.25rem;
+}
+
+.driver-popover.tour-carga-certa .driver-popover-close-btn:hover,
+.driver-popover.tour-carga-certa .driver-popover-close-btn:focus-visible {
+  color: var(--foreground);
+}
+
+.driver-popover.tour-carga-certa .driver-popover-footer {
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.driver-popover.tour-carga-certa .driver-popover-progress-text {
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+}
+
+.driver-popover.tour-carga-certa .driver-popover-footer-btn {
+  min-height: 2.5rem;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid var(--input);
+  border-radius: calc(var(--radius) - 2px);
+  background-color: transparent;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-shadow: none;
+}
+
+.driver-popover.tour-carga-certa .driver-popover-footer-btn:hover,
+.driver-popover.tour-carga-certa .driver-popover-footer-btn:focus-visible {
+  background-color: var(--secondary);
+}
+
+.driver-popover.tour-carga-certa .driver-popover-next-btn {
+  border-color: var(--accent);
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+  font-weight: 600;
+}
+
+.driver-popover.tour-carga-certa .driver-popover-next-btn:hover,
+.driver-popover.tour-carga-certa .driver-popover-next-btn:focus-visible {
+  background-color: color-mix(in oklch, var(--accent) 88%, black);
+}
+
+.driver-popover.tour-carga-certa .driver-popover-footer-btn:focus-visible,
+.driver-popover.tour-carga-certa .driver-popover-close-btn:focus-visible,
+.driver-popover.tour-carga-certa .tour-pular:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* "Pular tutorial": linha propria, abaixo do rodape, para nao espremer os botoes. */
+.driver-popover.tour-carga-certa .tour-pular {
+  all: unset;
+  display: block;
+  margin-top: 0.75rem;
+  padding: 0.25rem 0;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.driver-popover.tour-carga-certa .tour-pular:hover {
+  color: var(--foreground);
+}
+
+/*
+  Moldura fina na cor de destaque em volta do item mostrado (pedido do usuario
+  em 2026-11-28), para achar o recorte de relance.
+
+  E o outline do proprio elemento, e por isso precisa caber DENTRO do recorte
+  claro do overlay (stagePadding 6 em tutorial/executar.ts): vai de 2 a 4 px
+  fora do elemento. Mais longe, cairia embaixo da camada escura e sairia
+  apagado. O stageRadius 6 de la casa os cantos com os itens sem borda
+  arredondada (o titulo, a grade de totais). O dummy e o "elemento" invisivel
+  dos passos sem alvo, no meio da tela.
+*/
+.driver-active .driver-active-element:not(#driver-dummy-element) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* A seta pinta so o lado que aponta; os outros tres a biblioteca deixa transparentes. */
+.driver-popover.tour-carga-certa .driver-popover-arrow-side-left {
+  border-left-color: var(--popover);
+}
+.driver-popover.tour-carga-certa .driver-popover-arrow-side-right {
+  border-right-color: var(--popover);
+}
+.driver-popover.tour-carga-certa .driver-popover-arrow-side-top {
+  border-top-color: var(--popover);
+}
+.driver-popover.tour-carga-certa .driver-popover-arrow-side-bottom {
+  border-bottom-color: var(--popover);
+}

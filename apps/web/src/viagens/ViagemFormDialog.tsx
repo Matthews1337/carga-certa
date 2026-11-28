@@ -74,15 +74,13 @@ export function ViagemFormDialog({
     definir: (qual, lugar) => form.setValue(qual, lugar, { shouldValidate: form.formState.isSubmitted }),
   });
 
-  const { setMarcando } = rota;
   useEffect(() => {
     if (aberto) {
       form.reset(valoresIniciais(viagem));
       setErro(null);
-      setMarcando(viagem ? 'destino' : 'origem');
       setAbertura((n) => n + 1);
     }
-  }, [aberto, viagem, form, setMarcando]);
+  }, [aberto, viagem, form]);
 
   const gravar = useMutation({
     mutationFn: (campos: CamposViagem) =>
@@ -139,6 +137,7 @@ export function ViagemFormDialog({
               origem={origem}
               destino={destino}
               aoMudar={(qual, lugar) => form.setValue(qual, lugar, validarSeJaEnviou)}
+              aoMarcarOrigem={(ponto) => void rota.marcar('origem', ponto)}
               erros={{ origem: erros.origem?.message, destino: erros.destino?.message }}
             />
 

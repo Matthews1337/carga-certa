@@ -37,6 +37,7 @@ import { chavesDespesa, listarDespesas, type DespesaDaLista, type FiltrosDespesa
 import { DespesaFormDialog } from '@/despesas/DespesaFormDialog';
 import { ExcluirDespesaDialog } from '@/despesas/ExcluirDespesaDialog';
 import { BotaoComprovante } from '@/despesas/BotaoComprovante';
+import { CabecalhoDaPagina } from '@/layout/CabecalhoDaPagina';
 
 const TODOS = 'todos';
 
@@ -68,15 +69,14 @@ export function DespesasPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Despesas</h1>
-          <p className="text-sm text-muted-foreground">
-            Gastos do caminhão e do motorista, dentro e fora de frete.
-          </p>
-        </div>
+      <CabecalhoDaPagina
+        titulo="Despesas"
+        descricao="Gastos do caminhão e do motorista, dentro e fora de frete."
+        tour="despesas"
+      >
         <Button
           variant="accent"
+          data-tour="despesas-nova"
           onClick={() => {
             setEditando(undefined);
             setFormAberto(true);
@@ -85,16 +85,16 @@ export function DespesasPage() {
           <Plus className="size-4" aria-hidden />
           Nova despesa
         </Button>
-      </header>
+      </CabecalhoDaPagina>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div data-tour="despesas-totais" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Totalizador rotulo="Total no período" valor={resumo.total} destaque />
         <Totalizador rotulo="Caminhão" valor={resumo.veiculo} />
         <Totalizador rotulo="Motorista" valor={resumo.pessoal} />
         <Totalizador rotulo="Administrativo" valor={resumo.admin} />
       </div>
 
-      <Card>
+      <Card data-tour="despesas-filtros">
         <CardContent className="grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-5">
           <FiltroCampo rotulo="De">
             <Input
@@ -192,7 +192,7 @@ export function DespesasPage() {
           }
         />
       ) : (
-        <Card>
+        <Card data-tour="despesas-lista">
           <Table>
             <TableHeader>
               <TableRow>

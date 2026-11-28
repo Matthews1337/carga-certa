@@ -22,6 +22,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Carregando, ErroConsulta } from '@/components/ui/feedback';
+import { CabecalhoDaPagina } from '@/layout/CabecalhoDaPagina';
 import { cn } from '@/lib/utils';
 import { carregarResumoDoMes, chavesPainel } from '@/painel/api';
 
@@ -50,13 +51,12 @@ export function PainelPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Painel</h1>
-          <p className="text-sm text-muted-foreground">Resumo financeiro e de rodagem do mês.</p>
-        </div>
-
-        <nav className="flex items-center gap-1" aria-label="Escolher o mês">
+      <CabecalhoDaPagina
+        titulo="Painel"
+        descricao="Resumo financeiro e de rodagem do mês."
+        tour="painel"
+      >
+        <nav data-tour="painel-mes" className="flex items-center gap-1" aria-label="Escolher o mês">
           <Button
             variant="outline"
             size="icon"
@@ -87,7 +87,7 @@ export function PainelPage() {
             </Button>
           ) : null}
         </nav>
-      </header>
+      </CabecalhoDaPagina>
 
       {resumo.isPending ? (
         <Carregando />
@@ -103,12 +103,14 @@ export function PainelPage() {
         >
           <CartaoResultado resumo={resumo.data} />
           <CartaoIndicador
+            tour="painel-viagens"
             icone={Route}
             titulo="Viagens"
             valor={String(resumo.data.viagens.total)}
             detalhe={detalheViagens(resumo.data)}
           />
           <CartaoIndicador
+            tour="painel-km"
             icone={Gauge}
             titulo="Km rodados"
             // "≈" quando parte da soma e estimada pela rota, e nao medida.
@@ -131,7 +133,7 @@ export function PainelPage() {
 function CartaoResultado({ resumo }: { resumo: ResumoMensal }) {
   const { entrou, saiu, saldo } = resumo;
   return (
-    <Card className="border-accent/50 bg-accent/5">
+    <Card data-tour="painel-resultado" className="border-accent/50 bg-accent/5">
       <CardContent className="flex flex-col gap-4 p-5 pt-5">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -174,12 +176,14 @@ function CartaoResultado({ resumo }: { resumo: ResumoMensal }) {
 }
 
 function CartaoIndicador({
+  tour,
   icone: Icone,
   titulo,
   valor,
   detalhe,
   alerta,
 }: {
+  tour?: string;
   icone: LucideIcon;
   titulo: string;
   valor: string;
@@ -187,7 +191,7 @@ function CartaoIndicador({
   alerta?: boolean;
 }) {
   return (
-    <Card>
+    <Card data-tour={tour}>
       <CardContent className="flex flex-col gap-1 p-5 pt-5">
         <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           <Icone className="size-4" aria-hidden />

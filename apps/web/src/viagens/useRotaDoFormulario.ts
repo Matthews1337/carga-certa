@@ -1,13 +1,13 @@
 import { decodificarPolyline, type Ponto } from '@carga-certa/shared';
 import { useQuery } from '@tanstack/react-query';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 
 import { calcularRota, lugarDoPonto, type Coordenada, type Lugar } from '@/lib/rotas';
-import type { RotaParaGravar } from '@/viagens/esquema';
+import { pinoDoClique, type RotaParaGravar } from '@/viagens/esquema';
 
 /**
- * Rota do formulario de frete e de viagem: o calculo pelo servico de rotas, o
- * clique no mapa que marca um ponto e o "qual ponto o clique marca".
+ * Rota do formulario de frete e de viagem: o calculo pelo servico de rotas e o
+ * clique no mapa que marca um ponto (qual deles, decide `pinoDoClique`).
  *
  * O formulario guarda origem e destino; o hook recebe os valores e devolve a
  * rota pronta para o mapa e para gravar.
@@ -107,8 +107,6 @@ export function useRotaDoFormulario({
   /** Grava o lugar no formulario. */
   definir: (qual: Qual, lugar: Lugar) => void;
 }) {
-  const [marcando, setMarcando] = useState<Qual>('origem');
-
   // Valores da ultima renderizacao, para o `marcar` conferir depois do await.
   const atuais = useRef({ origem, destino });
   atuais.current = { origem, destino };
@@ -138,7 +136,6 @@ export function useRotaDoFormulario({
     // Primeiro o ponto, com as coordenadas como nome; o nome de verdade chega
     // depois, sem segurar o desenho da rota.
     definir(qual, { nome: `${ponto.lat.toFixed(5)}, ${ponto.lng.toFixed(5)}`, ...ponto });
-    if (qual === 'origem' && !atuais.current.destino) setMarcando('destino');
     try {
       const lugar = await lugarDoPonto(ponto);
       const atual = atuais.current[qual];
@@ -156,9 +153,10 @@ export function useRotaDoFormulario({
     rota,
     calculando: calculo.isFetching,
     erro: calculo.isError ? (calculo.error as Error).message : null,
-    marcando,
-    setMarcando,
     marcar,
+    /** Clique no mapa: `pinoDoClique` decide se marca o inicio ou o fim. */
+    clicar: (ponto: Coordenada) =>
+      marcar(pinoDoClique(atuais.current.origem, atuais.current.destino, ponto), ponto),
   };
 }
 

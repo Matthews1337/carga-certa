@@ -10,6 +10,7 @@ import { chavesFretes, listarFretes, type FreteDaLista } from '@/fretes/api';
 import { FreteDetalheDialog } from '@/fretes/FreteDetalheDialog';
 import { FreteFormDialog } from '@/fretes/FreteFormDialog';
 import { ValorDoFrete } from '@/fretes/ValorDoFrete';
+import { CabecalhoDaPagina } from '@/layout/CabecalhoDaPagina';
 import { cn } from '@/lib/utils';
 import { cidadeDoLugar, kmDaViagem, mesDoInicio } from '@/viagens/apresentacao';
 import { MiniMapaDaViagem } from '@/viagens/MiniMapa';
@@ -32,18 +33,16 @@ export function FretesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Fretes</h1>
-          <p className="text-sm text-muted-foreground">
-            Cada frete com a sua viagem: rota, km, mês e quanto já caiu.
-          </p>
-        </div>
-        <Button variant="accent" onClick={novo}>
+      <CabecalhoDaPagina
+        titulo="Fretes"
+        descricao="Cada frete com a sua viagem: rota, km, mês e quanto já caiu."
+        tour="fretes"
+      >
+        <Button variant="accent" data-tour="fretes-novo" onClick={novo}>
           <Plus className="size-4" aria-hidden />
           Novo frete
         </Button>
-      </header>
+      </CabecalhoDaPagina>
 
       {fretes.isPending ? (
         <Carregando />
@@ -62,8 +61,14 @@ export function FretesPage() {
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {fretes.data.map((f) => (
-            <CartaoFrete key={f.id} frete={f} aoAbrir={() => setDetalhe(f.id)} />
+          {fretes.data.map((f, i) => (
+            <CartaoFrete
+              key={f.id}
+              frete={f}
+              aoAbrir={() => setDetalhe(f.id)}
+              // O tour do botao "i" destaca so o primeiro card.
+              tour={i === 0 ? 'fretes-card' : undefined}
+            />
           ))}
         </div>
       )}
@@ -87,7 +92,15 @@ export function FretesPage() {
   );
 }
 
-function CartaoFrete({ frete, aoAbrir }: { frete: FreteDaLista; aoAbrir: () => void }) {
+function CartaoFrete({
+  frete,
+  aoAbrir,
+  tour,
+}: {
+  frete: FreteDaLista;
+  aoAbrir: () => void;
+  tour?: string;
+}) {
   const v = frete.viagem;
   const origem = cidadeDoLugar(v?.origem_nome);
   const destino = cidadeDoLugar(v?.destino_nome);
@@ -103,6 +116,7 @@ function CartaoFrete({ frete, aoAbrir }: { frete: FreteDaLista; aoAbrir: () => v
   // Santos, SP, botao" - e nao o card todo, com mapa e numeros, como nome.
   return (
     <article
+      data-tour={tour}
       className={cn(
         'relative flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground',
         'transition-colors hover:border-accent has-focus-visible:ring-2 has-focus-visible:ring-ring',

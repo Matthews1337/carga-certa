@@ -3,9 +3,10 @@ import {
   formatarBRL,
   formatarPlaca,
   somar,
+  VIAGEM_ABERTA,
   type Ponto,
 } from '@carga-certa/shared';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type QueryKey } from '@tanstack/react-query';
 import { MapPin, Pencil } from 'lucide-react';
 import { useMemo, type ReactNode } from 'react';
 
@@ -22,10 +23,12 @@ import {
   type ViagemNaTela,
 } from '@/viagens/api';
 import { MapaViagem } from '@/viagens/MapaViagem';
+import { PosicaoDoAparelho } from '@/viagens/PosicaoDoAparelho';
 
 /**
- * Partes do detalhe iguais no frete e na viagem: o mapa com a ultima posicao do
- * celular, as despesas da viagem, os quadros de numeros e o rodape.
+ * Partes do detalhe iguais no frete e na viagem: o mapa com a ultima posicao
+ * enviada (e os botoes de GPS), as despesas da viagem, os quadros de numeros e
+ * o rodape.
  */
 
 /** Despesas da viagem e o total, sem as canceladas (mesmo corte do Painel). */
@@ -53,9 +56,12 @@ export function useConjunto(viagem: ViagemNaTela | null): string {
 export function MapaDoDetalhe({
   viagem: v,
   posicao,
+  chaveDaLista,
 }: {
   viagem: ViagemNaTela | null;
   posicao: PosicaoAtual | null;
+  /** Lista que o detalhe le: recarregada depois de gravar uma posicao. */
+  chaveDaLista: QueryKey;
 }) {
   const mapa = useMemo(() => {
     let rota: Ponto[] | null = null;
@@ -86,9 +92,13 @@ export function MapaDoDetalhe({
       <p className="-mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
         <MapPin className="size-4 shrink-0" aria-hidden />
         {posicao
-          ? `Última posição do celular ${tempoDesde(posicao.registrado_em)}.`
-          : 'O celular ainda não enviou a posição desta viagem.'}
+          ? `Última posição enviada ${tempoDesde(posicao.registrado_em)}.`
+          : 'Nenhuma posição enviada para esta viagem ainda.'}
       </p>
+      {/* Viagem concluida ou cancelada nao recebe posicao: o caminhao ja chegou. */}
+      {v && VIAGEM_ABERTA.includes(v.status) ? (
+        <PosicaoDoAparelho viagemId={v.id} chaveDaLista={chaveDaLista} />
+      ) : null}
     </>
   );
 }

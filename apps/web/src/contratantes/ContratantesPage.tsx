@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ConfirmarExclusao } from '@/components/ui/confirmar-exclusao';
 import { Carregando, ErroConsulta, Vazio } from '@/components/ui/feedback';
 import { Input } from '@/components/ui/input';
+import { CabecalhoDaPagina } from '@/layout/CabecalhoDaPagina';
 import {
   chavesContratantes,
   excluirContratante,
@@ -42,18 +43,16 @@ export function ContratantesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Contratantes</h1>
-          <p className="text-sm text-muted-foreground">
-            Empresas e pessoas que contratam seus fretes.
-          </p>
-        </div>
-        <Button variant="accent" onClick={novo}>
+      <CabecalhoDaPagina
+        titulo="Contratantes"
+        descricao="Empresas e pessoas que contratam seus fretes."
+        tour="contratantes"
+      >
+        <Button variant="accent" data-tour="contratantes-novo" onClick={novo}>
           <Plus className="size-4" aria-hidden />
           Novo contratante
         </Button>
-      </header>
+      </CabecalhoDaPagina>
 
       {contratantes.isPending ? (
         <Carregando />
@@ -72,7 +71,7 @@ export function ContratantesPage() {
         />
       ) : (
         <>
-          <div className="relative max-w-md">
+          <div data-tour="contratantes-busca" className="relative max-w-md">
             <Search
               className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden
@@ -94,10 +93,12 @@ export function ContratantesPage() {
             />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {filtrados.map((c) => (
+              {filtrados.map((c, i) => (
                 <CartaoContratante
                   key={c.id}
                   contratante={c}
+                  // O tour do botao "i" destaca so o primeiro card.
+                  tour={i === 0 ? 'contratantes-card' : undefined}
                   aoEditar={() => {
                     setEditando(c);
                     setFormAberto(true);
@@ -138,15 +139,17 @@ export function ContratantesPage() {
 
 function CartaoContratante({
   contratante: c,
+  tour,
   aoEditar,
   aoExcluir,
 }: {
   contratante: Contratante;
+  tour?: string;
   aoEditar: () => void;
   aoExcluir: () => void;
 }) {
   return (
-    <Card>
+    <Card data-tour={tour}>
       <CardContent className="flex flex-col gap-3 p-5 pt-5">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">

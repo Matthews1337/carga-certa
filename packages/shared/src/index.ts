@@ -19,6 +19,7 @@ export * from './alertas';
 export * from './storage';
 export * from './polyline';
 export * from './rota';
+export * from './posicao';
 export * from './viagem';
 export * from './recebimento';
 export * from './validation';

@@ -1,7 +1,13 @@
-import { STATUS_VIAGEM, dataLocal, fimDaViagem, type StatusViagem } from '@carga-certa/shared';
+import {
+  STATUS_VIAGEM,
+  dataLocal,
+  distanciaKm,
+  fimDaViagem,
+  type StatusViagem,
+} from '@carga-certa/shared';
 import { z } from 'zod';
 
-import type { Lugar } from '@/lib/rotas';
+import type { Coordenada, Lugar } from '@/lib/rotas';
 
 /**
  * Regras do formulario de viagem e a conversao para a linha do banco.
@@ -14,6 +20,23 @@ import type { Lugar } from '@/lib/rotas';
 
 /** Valor do select para "nenhum" (sem carreta, sem contratante). */
 export const SEM_VINCULO = 'nenhum';
+
+/**
+ * Qual pino o clique no mapa do formulario marca, sem a pessoa escolher antes
+ * (pedido do usuario em 2026-11-28; antes havia um seletor Inicio/Fim): o que
+ * falta, na ordem; com os dois marcados, o mais perto do clique - e assim que
+ * se corrige um ponto sem arrastar.
+ */
+export function pinoDoClique(
+  origem: Coordenada | null,
+  destino: Coordenada | null,
+  clique: Coordenada,
+): 'origem' | 'destino' {
+  if (!origem) return 'origem';
+  if (!destino) return 'destino';
+  const ate = (p: Coordenada) => distanciaKm([p.lat, p.lng], [clique.lat, clique.lng]);
+  return ate(destino) < ate(origem) ? 'destino' : 'origem';
+}
 
 export const esquemaLugar = z.object({ nome: z.string(), lat: z.number(), lng: z.number() });
 
